@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SplashScreen" parent="Theme.DrChat">
+
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="windowSplashScreenBackground">@color/dark_grey</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+
+    </style>
+</resources>

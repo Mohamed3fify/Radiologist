@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "629129754377",
+    "project_id": "dr-chat-ce419",
+    "storage_bucket": "dr-chat-ce419.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629129754377:android:d3540023b0ffac284605d8",
+        "android_client_info": {
+          "package_name": "com.example.drchat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtKKnqPt1458Nsu0jpWmU7THbn5wlGM2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

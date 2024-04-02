@@ -24,18 +24,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -46,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -57,10 +56,8 @@ import coil.size.Size
 import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
-import com.example.drchat.ui.theme.black
 import com.example.drchat.ui.theme.botResponse
 import com.example.drchat.ui.theme.darkBlue
-import com.example.drchat.ui.theme.warmGrey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -92,12 +89,12 @@ class ChatBotActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Grey)
-                                    .height(55.dp)
+                                    .height(70.dp)
                                     .padding(horizontal = 16.dp)
                             )
                             {
                                 Text(
-                                    modifier = Modifier.align(Alignment.CenterStart),
+                                    modifier = Modifier.align(Alignment.Center),
                                     text = "DrChat",
                                     fontSize = 25.sp,
                                     color = MaterialTheme.colorScheme.onPrimary
@@ -106,7 +103,9 @@ class ChatBotActivity : ComponentActivity() {
 
                             }
                         }
-                    ) {
+                    )
+
+                    {
                         ChatScreen(paddingValues = it)
 
                     }
@@ -125,7 +124,7 @@ class ChatBotActivity : ComponentActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Grey)
+                .background(Color.White)
                 .padding(top = paddingValues.calculateTopPadding()),
             verticalArrangement = Arrangement.Bottom
         ) {
@@ -166,16 +165,17 @@ class ChatBotActivity : ComponentActivity() {
                             bitmap = it.asImageBitmap()
                         )
                     }
-                    Icon(modifier = Modifier
-                        .size(40.dp)
-                        .clickable {
-                            imagePicker.launch(
-                                PickVisualMediaRequest
-                                    .Builder()
-                                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    .build()
-                            )
-                        },
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable {
+                                imagePicker.launch(
+                                    PickVisualMediaRequest
+                                        .Builder()
+                                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        .build()
+                                )
+                            },
                         imageVector = Icons.Rounded.AddPhotoAlternate,
                         contentDescription = "Add Photo",
                         tint = MaterialTheme.colorScheme.primary
@@ -183,7 +183,7 @@ class ChatBotActivity : ComponentActivity() {
                 }
                 Spacer(modifier = Modifier.width(8.dp))
 
-                TextField(
+                OutlinedTextField(
                     modifier = Modifier.weight(1f),
                     value = chatState.prompt,
                     onValueChange = {
@@ -195,14 +195,15 @@ class ChatBotActivity : ComponentActivity() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Icon(modifier = Modifier
+                Icon(
+                    modifier = Modifier
 
-                    .size(40.dp)
-                    .clickable {
-                        chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
-                        uriState.update { "" }
-                    },
-                    imageVector = Icons.AutoMirrored.Rounded.Send,
+                        .size(40.dp)
+                        .clickable {
+                            chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
+                            uriState.update { "" }
+                        },
+                    imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Send prompt",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -299,21 +300,13 @@ class ChatBotActivity : ComponentActivity() {
 
     }
 
+
 }
 
-/*@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun GreetingPreview() {
-    DrChatTheme {
-        Greeting("Android")
-    }
+ fun BotPreview() {
+
 }
-*/
+
+

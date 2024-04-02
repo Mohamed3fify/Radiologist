@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object ChatData {
-    val api_key = "AIzaSyD9lU9ZrgDw4ZjjtOjkdxs_2fglaXw_MX0"
+    private const val api_key = "AIzaSyD9lU9ZrgDw4ZjjtOjkdxs_2fglaXw_MX0"
 
     suspend fun getResponse(prompt: String): Chat {
         val generativeModel = GenerativeModel(

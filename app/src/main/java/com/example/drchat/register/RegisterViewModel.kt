@@ -3,10 +3,15 @@ package com.example.drchat.register
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.drchat.FirebaseUtils
 import com.example.drchat.model.AppUser
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
     val firstNameState = mutableStateOf("")
@@ -15,9 +20,14 @@ class RegisterViewModel : ViewModel() {
     val emailErrorState = mutableStateOf<String?>(null)
     val passwordState = mutableStateOf("")
     val passwordErrorState = mutableStateOf<String?>(null)
+    val confirmPasswordState = mutableStateOf("")
+    val confirmPasswordErrorState = mutableStateOf<String?>(null)
     private val auth = Firebase.auth
     val isLoading = mutableStateOf(false)
     val events = mutableStateOf<RegisterEvent>(RegisterEvent.Idle)
+
+    private val _accountAlreadyExists = MutableStateFlow(false)
+    val accountAlreadyExists: StateFlow<Boolean> = _accountAlreadyExists
 
 
     fun register() {
@@ -27,7 +37,12 @@ class RegisterViewModel : ViewModel() {
                 .addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
                         isLoading.value = false
-                        Log.e("TAG", "register: ${task.exception?.message}")
+                        if (task.exception is FirebaseAuthUserCollisionException) {
+                            setAccountAlreadyExists(true)
+                        } else {
+                            Log.e("TAG", "register: ${task.exception?.message}")
+                        }
+
                         return@addOnCompleteListener
                     }
                     val uid = task.result.user?.uid
@@ -43,7 +58,9 @@ class RegisterViewModel : ViewModel() {
         val user = AppUser(uid, firstNameState.value, emailState.value)
         FirebaseUtils.addUser(user, onSuccessListener = {
             isLoading.value = false
-            events.value = RegisterEvent.NavigateToChatBot(user)
+            // events.value = RegisterEvent.NavigateToChatBot(user)  , // to navigate to chat bot after create the account
+            events.value =
+                RegisterEvent.NavigateToLogin   // , to navigate to login after create the account
         }, onFailureListener = {
             isLoading.value = false
             Log.e("Tag", "addUserToFirestore: ${it.message}")
@@ -51,6 +68,8 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun validateFields(): Boolean {
+        var isValid = true
+
         if (firstNameState.value.isEmpty() && firstNameState.value.isBlank()) {
             firstNameErrorState.value = "Required"
             return false
@@ -75,8 +94,38 @@ class RegisterViewModel : ViewModel() {
         } else {
             passwordErrorState.value = null
         }
+        //new
+        if (confirmPasswordState.value != passwordState.value) {
+            confirmPasswordErrorState.value = "Passwords do not match"
+            return false
+        } else {
+            confirmPasswordErrorState.value = null
+        }
 
         return true
 
     }
+
+    fun navigateToLogin() {
+        events.value = RegisterEvent.NavigateToLogin
+
+    }
+
+    fun resetEvent() {
+        events.value = RegisterEvent.Idle
+    }
+
+    fun setAccountAlreadyExists(value: Boolean) {
+        viewModelScope.launch {
+            _accountAlreadyExists.value = value
+        }
+    }
+
+    fun resetAccountAlreadyExists() {
+        viewModelScope.launch {
+            _accountAlreadyExists.value = false
+        }
+    }
+
+
 }

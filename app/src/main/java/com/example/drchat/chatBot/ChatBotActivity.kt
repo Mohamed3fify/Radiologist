@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,18 +58,16 @@ import coil.size.Size
 import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
-import com.example.drchat.ui.theme.botResponse
-import com.example.drchat.ui.theme.darkBlue
+import com.example.drchat.ui.theme.txt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
 class ChatBotActivity : ComponentActivity() {
-
     private val uriState = MutableStateFlow("")
 
     private val imagePicker =
         registerForActivityResult<PickVisualMediaRequest, Uri>(
-            ActivityResultContracts.PickVisualMedia()
+            ActivityResultContracts.PickVisualMedia(),
         ) { uri ->
             uri?.let {
                 uriState.update { uri.toString() }
@@ -78,36 +78,38 @@ class ChatBotActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DrChatTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     Scaffold(
                         topBar = {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Grey)
-                                    .height(70.dp)
-                                    .padding(horizontal = 16.dp)
-                            )
-                            {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    text = "DrChat",
-                                    fontSize = 25.sp,
-                                    color = MaterialTheme.colorScheme.onPrimary
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .background(Grey)
+                                        .height(70.dp)
+                                        .padding(horizontal = 16.dp),
+                            ) {
+//                                Text(
+//                                    modifier = Modifier.align(Alignment.Center),
+//                                    text = "DrChat",
+//                                    fontSize = 25.sp,
+//                                    color = MaterialTheme.colorScheme.onPrimary
+//                                )
+                                Image(
+                                    painter = painterResource(R.drawable.logo),
+                                    contentDescription = "App logo",
+                                    modifier =
+                                        Modifier.size(90.dp)
+                                            .align(Alignment.Center)
+                                            .padding(top = 20.dp),
                                 )
-
-
                             }
-                        }
-                    )
-
-                    {
-                        ChatScreen(paddingValues = it)
-
+                        },
+                    ) {
+                        chatScreen(paddingValues = it)
                     }
                 }
             }
@@ -115,31 +117,32 @@ class ChatBotActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ChatScreen(paddingValues: PaddingValues) {
+    fun chatScreen(paddingValues: PaddingValues) {
         val chatViewModel = viewModel<ChatViewModel>()
         val chatState = chatViewModel.chatState.collectAsState().value
         val bitmap = getBitmap()
 
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(top = paddingValues.calculateTopPadding()),
-            verticalArrangement = Arrangement.Bottom
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Grey)
+                    .padding(top = paddingValues.calculateTopPadding()),
+            verticalArrangement = Arrangement.Bottom,
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                reverseLayout = true
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                reverseLayout = true,
             ) {
                 itemsIndexed(chatState.chatList) { index, chat ->
                     if (chat.isFromUser) {
                         userItem(
                             prompt = chat.prompt,
-                            bitmap = chat.bitmap
+                            bitmap = chat.bitmap,
                         )
                     } else {
                         botItem(response = chat.prompt)
@@ -147,103 +150,121 @@ class ChatBotActivity : ComponentActivity() {
                 }
             }
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp, start = 4.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp, start = 4.dp, end = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     bitmap?.let {
                         Image(
-                            modifier = Modifier
-
-                                .size(40.dp)
-                                .padding(bottom = 2.dp)
-                                .clip(RoundedCornerShape(6.dp)),
+                            modifier =
+                                Modifier
+                                    .size(40.dp)
+                                    .padding(bottom = 2.dp)
+                                    .clip(RoundedCornerShape(6.dp)),
                             contentDescription = "picked image",
                             contentScale = ContentScale.Crop,
-                            bitmap = it.asImageBitmap()
+                            bitmap = it.asImageBitmap(),
                         )
                     }
                     Icon(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                imagePicker.launch(
-                                    PickVisualMediaRequest
-                                        .Builder()
-                                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        .build()
-                                )
-                            },
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .clickable {
+                                    imagePicker.launch(
+                                        PickVisualMediaRequest
+                                            .Builder()
+                                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            .build(),
+                                    )
+                                },
                         imageVector = Icons.Rounded.AddPhotoAlternate,
                         contentDescription = "Add Photo",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
 
                 OutlinedTextField(
                     modifier = Modifier.weight(1f),
+                    textStyle =
+                        TextStyle(
+                            color = Color.White,
+                            fontSize = 18.sp,
+                        ),
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            errorContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.White,
+                            unfocusedIndicatorColor = Color.White,
+                        ),
                     value = chatState.prompt,
                     onValueChange = {
                         chatViewModel.onEvent(ChatUiEvent.UpdatePrompt(it))
                     },
                     placeholder = {
-                        Text(text = "message")
-                    }
+                        Text(
+                            text = "message",
+                            color = Color.White,
+                        )
+                    },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
-                    modifier = Modifier
-
-                        .size(40.dp)
-                        .clickable {
-                            chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
-                            uriState.update { "" }
-                        },
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clickable {
+                                chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
+                                uriState.update { "" }
+                            },
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Send prompt",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
-
             }
         }
-
-
     }
 
-
     @Composable
-    fun userItem(prompt: String, bitmap: Bitmap?) {
+    fun userItem(
+        prompt: String,
+        bitmap: Bitmap?,
+    ) {
         Column(
-            modifier = Modifier.padding(start = 100.dp, bottom = 16.dp)
+            modifier = Modifier.padding(start = 100.dp, bottom = 16.dp),
         ) {
             bitmap?.let {
                 Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(260.dp)
-                        .padding(bottom = 2.dp)
-                        .clip(RoundedCornerShape(12.dp)),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                            .padding(bottom = 2.dp)
+                            .clip(RoundedCornerShape(12.dp)),
                     contentDescription = "image",
                     contentScale = ContentScale.Crop,
-                    bitmap = it.asImageBitmap()
+                    bitmap = it.asImageBitmap(),
                 )
             }
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(darkBlue)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(com.example.drchat.ui.theme.userItem)
+                        .padding(16.dp),
                 text = prompt,
                 fontSize = 17.sp,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = Color.White,
             )
-
         }
     }
 
@@ -251,62 +272,56 @@ class ChatBotActivity : ComponentActivity() {
     fun botItem(response: String) {
         val profileImage = painterResource(R.drawable.logo)
 
-
         Column(
-            modifier = Modifier.padding(end = 100.dp, bottom = 16.dp)
+            modifier = Modifier.padding(end = 100.dp, bottom = 16.dp),
         ) {
             Image(
                 painter = profileImage,
                 contentDescription = "Profile Photo",
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(10.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color.Transparent),
-                contentScale = ContentScale.Crop
+                modifier =
+                    Modifier
+                        .size(50.dp)
+                        .padding(10.dp)
+                        .background(Color.Transparent),
+                //  contentScale = ContentScale.Crop
             )
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(botResponse)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(com.example.drchat.ui.theme.botItem)
+                        .padding(16.dp),
                 text = response,
                 fontSize = 17.sp,
-                color = MaterialTheme.colorScheme.onTertiary
+                color = txt,
             )
-
         }
-
     }
 
     @Composable
     private fun getBitmap(): Bitmap? {
         val uri = uriState.collectAsState().value
 
-        val imageState: AsyncImagePainter.State = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(uri)
-                .size(Size.ORIGINAL)
-                .build()
-        ).state
+        val imageState: AsyncImagePainter.State =
+            rememberAsyncImagePainter(
+                model =
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(uri)
+                        .size(Size.ORIGINAL)
+                        .build(),
+            ).state
 
         if (imageState is AsyncImagePainter.State.Success) {
             return imageState.result.drawable.toBitmap()
         }
 
         return null
-
     }
-
-
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
- fun BotPreview() {
-
+fun botPreview() {
 }
-
-

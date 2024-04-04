@@ -15,7 +15,8 @@ class LoginViewModel : ViewModel() {
     val passwordErrorState = mutableStateOf<String?>(null)
     val isLoading = mutableStateOf(false)
     val events = mutableStateOf<LoginEvent>(LoginEvent.Idle)
-     val auth = Firebase.auth
+    val auth = Firebase.auth
+    val loginSuccess = mutableStateOf(false)
 
     fun login(){
         if (validateFields()) {
@@ -24,6 +25,7 @@ class LoginViewModel : ViewModel() {
                 .addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
                         isLoading.value = false
+                        events.value = LoginEvent.LoginFailed
                         Log.e("TAG", "error -> ${task.exception?.message}")
                         return@addOnCompleteListener
                     }
@@ -36,6 +38,7 @@ class LoginViewModel : ViewModel() {
     private fun getUserFromFirestore(uid: String) {
         FirebaseUtils.getUser(uid, onSuccessListener = { documentSnapshot ->
             isLoading.value = false
+            loginSuccess.value = true
             val user = documentSnapshot.toObject(AppUser::class.java)
             navigateToChatBot(user!!)
         }, onFailureListener = {
@@ -77,5 +80,8 @@ class LoginViewModel : ViewModel() {
 
     fun resetEvent() {
         events.value = LoginEvent.Idle
+    }
+    fun resetLoginSuccess() {
+        loginSuccess.value = false
     }
 }

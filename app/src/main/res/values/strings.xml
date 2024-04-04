@@ -3,13 +3,14 @@
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_login">loginActivity</string>
     <string name="icon_back"> Icon back</string>
-    <string name="login"> login</string>
+    <string name="login"> Login</string>
     <string name="email"> email </string>
     <string name="password"> Password </string>
+    <string name="confirm_password"> Confirm Password </string>
     <string name="create"> Create </string>
     <string name="register"> Register </string>
     <string name="first_name"> first name </string>
     <string name="create_account"> create account </string>
-    <string name="or_create_my_account"> or Create my account </string>
+    <string name="sign_up"> SignUp </string>
     <string name="title_activity_register">RegisterActivity</string>
 </resources>

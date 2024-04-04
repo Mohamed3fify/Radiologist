@@ -17,3 +17,8 @@ val botResponse = Color(0xFF282C2D)
 val ColorTextGPT = Color(0xFFFFFFF2)
 val blue = Color(0xFF303030)
 val shadowColor = Color(0x1A303030)
+val light_blue = Color(0xFF1CD6CE)
+
+val userItem = Color(0xFFA83B78)
+val botItem = Color(0xFF444444)
+val txt = Color(0xFFF0F0F0)

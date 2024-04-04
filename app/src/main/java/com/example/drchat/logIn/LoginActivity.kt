@@ -4,13 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,7 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,9 +35,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.drchat.R
 import com.example.drchat.chatBot.ChatBotActivity
-import com.example.drchat.logIn.ui.theme.DrChatTheme
+import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.register.RegisterActivity
-import com.example.drchat.ui.theme.black
+import com.example.drchat.ui.theme.Grey
 import com.example.drchat.utils.ChatAuthButton
 import com.example.drchat.utils.ChatAuthTextField
 import com.example.drchat.utils.ChatToolbar
@@ -58,18 +66,29 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
             modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.White),
+                .background(Grey),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.4F))
+            Spacer(modifier = Modifier.fillMaxHeight(0.15F)) // Add padding below ChatToolbar
+            Box {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "App logo",
+                    //contentScale = ContentScale.Crop, // Adjust content scale as needed
+                    modifier = Modifier.size(120.dp)
+
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.20F))
             Text(
                 text = "Welcome",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = black,
+                color = Color.White,
                 modifier = Modifier
                     .align(Alignment.Start)
-                    .padding(horizontal = 18.dp)
+                    .padding(horizontal = 25.dp)
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -91,21 +110,38 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
             ChatAuthButton(title = stringResource(id = R.string.login)) {
                 viewModel.login()
             }
-            TextButton(
-                onClick = {
-                    viewModel.navigateToRegister()
-                }, modifier = Modifier
-                    .padding(4.dp)
-                    .align(Alignment.Start)
+            Spacer(modifier = Modifier.height(13.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 5.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.or_create_my_account),
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Light
+                    text = "Don't have an account ?",
+                    color = Color.White,
+                    fontSize = 17.sp
+                    //modifier = Modifier.padding(start = 8.dp)
                 )
 
+                // Spacer(modifier = Modifier.width(16.dp)) // Add space between text and button
+
+                TextButton(
+                    onClick = {
+                        viewModel.navigateToRegister()
+                    },
+                    // modifier = Modifier.padding(1.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.sign_up),
+                        color = Color.Red,
+                        fontSize = 17.sp,
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
             }
+
 
         }
     }
@@ -124,6 +160,53 @@ fun TriggerEvents(
     val context = LocalContext.current
     when (event) {
         LoginEvent.Idle -> {}
+
+        // new
+        is LoginEvent.LoginSuccess -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.resetEvent() },
+                title = { Text("Login Successful") },
+                text = { Text("You have successfully logged in.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.resetEvent()
+                            viewModel.resetLoginSuccess()
+                            onFinish()
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        is LoginEvent.LoginFailed -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.resetEvent() },
+                title = { Text("Login Failed") },
+                text = { Text("Account not found. Create an account?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.navigateToRegister()
+                        }
+                    ) {
+                        Text("Create Account")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            viewModel.resetEvent()
+                            onFinish()
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
         is LoginEvent.NavigateToChatBot -> {
             val intent = Intent(context, ChatBotActivity::class.java)
             context.startActivity(intent)
@@ -137,6 +220,7 @@ fun TriggerEvents(
         }
     }
 }
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun LoginPreview() {

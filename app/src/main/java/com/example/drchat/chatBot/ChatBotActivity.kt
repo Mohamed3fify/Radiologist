@@ -11,7 +11,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -59,6 +59,7 @@ import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.txt
+import com.example.drchat.utils.ChatToolBar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -82,34 +83,16 @@ class ChatBotActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    Scaffold(
-                        topBar = {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(Grey)
-                                        .height(70.dp)
-                                        .padding(horizontal = 16.dp),
-                            ) {
-//                                Text(
-//                                    modifier = Modifier.align(Alignment.Center),
-//                                    text = "DrChat",
-//                                    fontSize = 25.sp,
-//                                    color = MaterialTheme.colorScheme.onPrimary
-//                                )
-                                Image(
-                                    painter = painterResource(R.drawable.logo),
-                                    contentDescription = "App logo",
-                                    modifier =
-                                        Modifier.size(90.dp)
-                                            .align(Alignment.Center)
-                                            .padding(top = 20.dp),
-                                )
-                            }
-                        },
-                    ) {
-                        chatScreen(paddingValues = it)
+                    Scaffold {
+                        Column(
+                            modifier = Modifier
+                            .fillMaxSize()
+                        ) {
+                            ChatToolBar()
+                            Divider()
+                            chatScreen(paddingValues = it)
+                        }
+
                     }
                 }
             }
@@ -124,18 +107,18 @@ class ChatBotActivity : ComponentActivity() {
 
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(Grey)
-                    .padding(top = paddingValues.calculateTopPadding()),
+            Modifier
+                .fillMaxSize()
+                .background(Grey)
+                .padding(top = paddingValues.calculateTopPadding()),
             verticalArrangement = Arrangement.Bottom,
         ) {
             LazyColumn(
                 modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp ),
                 reverseLayout = true,
             ) {
                 itemsIndexed(chatState.chatList) { index, chat ->
@@ -143,27 +126,30 @@ class ChatBotActivity : ComponentActivity() {
                         userItem(
                             prompt = chat.prompt,
                             bitmap = chat.bitmap,
+
                         )
                     } else {
-                        botItem(response = chat.prompt)
+                        botItem(
+                            response = chat.prompt
+                        )
                     }
                 }
             }
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp, start = 4.dp, end = 4.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp, start = 4.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     bitmap?.let {
                         Image(
                             modifier =
-                                Modifier
-                                    .size(40.dp)
-                                    .padding(bottom = 2.dp)
-                                    .clip(RoundedCornerShape(6.dp)),
+                            Modifier
+                                .size(40.dp)
+                                .padding(bottom = 2.dp)
+                                .clip(RoundedCornerShape(6.dp)),
                             contentDescription = "picked image",
                             contentScale = ContentScale.Crop,
                             bitmap = it.asImageBitmap(),
@@ -171,16 +157,16 @@ class ChatBotActivity : ComponentActivity() {
                     }
                     Icon(
                         modifier =
-                            Modifier
-                                .size(40.dp)
-                                .clickable {
-                                    imagePicker.launch(
-                                        PickVisualMediaRequest
-                                            .Builder()
-                                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                            .build(),
-                                    )
-                                },
+                        Modifier
+                            .size(40.dp)
+                            .clickable {
+                                imagePicker.launch(
+                                    PickVisualMediaRequest
+                                        .Builder()
+                                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        .build(),
+                                )
+                            },
                         imageVector = Icons.Rounded.AddPhotoAlternate,
                         contentDescription = "Add Photo",
                         tint = MaterialTheme.colorScheme.primary,
@@ -218,12 +204,12 @@ class ChatBotActivity : ComponentActivity() {
 
                 Icon(
                     modifier =
-                        Modifier
-                            .size(40.dp)
-                            .clickable {
-                                chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
-                                uriState.update { "" }
-                            },
+                    Modifier
+                        .size(40.dp)
+                        .clickable {
+                            chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
+                            uriState.update { "" }
+                        },
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Send prompt",
                     tint = MaterialTheme.colorScheme.primary,
@@ -236,6 +222,7 @@ class ChatBotActivity : ComponentActivity() {
     fun userItem(
         prompt: String,
         bitmap: Bitmap?,
+
     ) {
         Column(
             modifier = Modifier.padding(start = 100.dp, bottom = 16.dp),
@@ -243,11 +230,11 @@ class ChatBotActivity : ComponentActivity() {
             bitmap?.let {
                 Image(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(260.dp)
-                            .padding(bottom = 2.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .padding(bottom = 2.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     contentDescription = "image",
                     contentScale = ContentScale.Crop,
                     bitmap = it.asImageBitmap(),
@@ -256,11 +243,11 @@ class ChatBotActivity : ComponentActivity() {
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(com.example.drchat.ui.theme.userItem)
-                        .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(com.example.drchat.ui.theme.userItem)
+                    .padding(16.dp),
                 text = prompt,
                 fontSize = 17.sp,
                 color = Color.White,
@@ -272,6 +259,7 @@ class ChatBotActivity : ComponentActivity() {
     fun botItem(response: String) {
         val profileImage = painterResource(R.drawable.logo)
 
+
         Column(
             modifier = Modifier.padding(end = 100.dp, bottom = 16.dp),
         ) {
@@ -279,24 +267,25 @@ class ChatBotActivity : ComponentActivity() {
                 painter = profileImage,
                 contentDescription = "Profile Photo",
                 modifier =
-                    Modifier
-                        .size(50.dp)
-                        .padding(10.dp)
-                        .background(Color.Transparent),
+                Modifier
+                    .size(50.dp)
+                    .padding(10.dp)
+                    .background(Color.Transparent),
                 //  contentScale = ContentScale.Crop
             )
 
-            Text(
-                modifier =
+                Text(
+                    modifier =
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(com.example.drchat.ui.theme.botItem)
                         .padding(16.dp),
-                text = response,
-                fontSize = 17.sp,
-                color = txt,
-            )
+                    text = response,
+                    fontSize = 17.sp,
+                    color = txt,
+                )
+
         }
     }
 

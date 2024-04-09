@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drchat.data.Chat
 import com.example.drchat.data.ChatData
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,6 +20,9 @@ class ChatViewModel : ViewModel() {
         when (event) {
             is ChatUiEvent.SendPrompt -> {
                 if (event.prompt.isNotEmpty()) {
+                    _chatState.update {
+                        it.copy(isTyping = true) // Show typing indicator
+                    }
                     addPrompt(event.prompt, event.bitmap)
 
                     if (event.bitmap != null) {
@@ -26,6 +30,12 @@ class ChatViewModel : ViewModel() {
                     } else {
                         getResponse(event.prompt)
                     }
+                }
+            }
+
+            is ChatUiEvent.BotTyping -> {
+                _chatState.update {
+                    it.copy(isTyping = false) // Hide typing indicator when bot finishes typing
                 }
             }
 
@@ -59,6 +69,7 @@ class ChatViewModel : ViewModel() {
                     }
                 )
             }
+            onEvent(ChatUiEvent.BotTyping)
         }
     }
 
@@ -72,6 +83,8 @@ class ChatViewModel : ViewModel() {
                     }
                 )
             }
+            onEvent(ChatUiEvent.BotTyping)
         }
     }
+
 }

@@ -1,6 +1,7 @@
 package com.example.drchat.register
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -68,7 +69,6 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun validateFields(): Boolean {
-        var isValid = true
 
         if (firstNameState.value.isEmpty() && firstNameState.value.isBlank()) {
             firstNameErrorState.value = "Required"
@@ -76,10 +76,16 @@ class RegisterViewModel : ViewModel() {
         } else {
             firstNameErrorState.value = null
         }
+
         if (emailState.value.isEmpty() && emailState.value.isBlank()) {
             emailErrorState.value = "Required"
             return false
-        } else {
+        }
+            else if (!Patterns.EMAIL_ADDRESS.matcher(emailState.value).matches()) {
+                emailErrorState.value = "Email is badly formatted"
+                return false
+            }
+         else {
             emailErrorState.value = null
         }
         if (passwordState.value.isEmpty() && passwordState.value.isBlank()) {

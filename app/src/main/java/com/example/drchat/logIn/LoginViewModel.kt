@@ -3,10 +3,17 @@ package com.example.drchat.logIn
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.drchat.FirebaseUtils
 import com.example.drchat.model.AppUser
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
     val emailState = mutableStateOf("")
@@ -18,6 +25,8 @@ class LoginViewModel : ViewModel() {
     val auth = Firebase.auth
     val loginSuccess = mutableStateOf(false)
 
+
+
     fun login(){
         if (validateFields()) {
             isLoading.value = true
@@ -25,7 +34,15 @@ class LoginViewModel : ViewModel() {
                 .addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
                         isLoading.value = false
-                        events.value = LoginEvent.LoginFailed
+                            events.value = LoginEvent.LoginFailed
+
+                        // invalid email exception
+                        /*else if (task.exception is FirebaseAuthInvalidUserException ) {
+
+                            events.value = LoginEvent.LoginFailedAccountNotFound
+                        }*/
+
+
                         Log.e("TAG", "error -> ${task.exception?.message}")
                         return@addOnCompleteListener
                     }
@@ -65,7 +82,6 @@ class LoginViewModel : ViewModel() {
         } else {
             passwordErrorState.value = null
         }
-
         return true
 
     }
@@ -84,4 +100,5 @@ class LoginViewModel : ViewModel() {
     fun resetLoginSuccess() {
         loginSuccess.value = false
     }
+
 }

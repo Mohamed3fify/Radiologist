@@ -35,13 +35,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.drchat.R
 import com.example.drchat.chatBot.ChatBotActivity
-import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.register.RegisterActivity
+import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.utils.ChatAuthButton
 import com.example.drchat.utils.ChatAuthTextField
-import com.example.drchat.utils.ChatToolbar
 import com.example.drchat.utils.LoadingDialog
+import com.example.drchat.utils.Toolbar
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,10 +58,14 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) {
+
     Scaffold(topBar = {
-        ChatToolbar(title = stringResource(id = R.string.login))
-    }) { paddingValues ->
+        Toolbar(title = stringResource(id = R.string.login))
+
+    })
+    { paddingValues ->
         paddingValues
+
         Column(
             modifier =
             Modifier
@@ -69,6 +73,7 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
                 .background(Grey),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Spacer(modifier = Modifier.fillMaxHeight(0.15F)) // Add padding below ChatToolbar
             Box {
                 Image(
@@ -149,6 +154,8 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
         onFinish()
     }
     LoadingDialog(isLoading = viewModel.isLoading)
+
+
 }
 
 @Composable
@@ -184,7 +191,8 @@ fun TriggerEvents(
             AlertDialog(
                 onDismissRequest = { viewModel.resetEvent() },
                 title = { Text("Login Failed") },
-                text = { Text("Account not found. Create an account?") },
+                text = { Text("Email or Password is incorrect , try again or create a new account ") },
+
                 confirmButton = {
                     Button(
                         onClick = {
@@ -201,7 +209,7 @@ fun TriggerEvents(
                             onFinish()
                         }
                     ) {
-                        Text("Cancel")
+                        Text("Try again ")
                     }
                 }
             )

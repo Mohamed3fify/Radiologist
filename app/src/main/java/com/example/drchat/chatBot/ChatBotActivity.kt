@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
@@ -46,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,6 +61,7 @@ import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.txt
+import com.example.drchat.utils.BotTypingIndicator
 import com.example.drchat.utils.ChatToolBar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -88,7 +91,10 @@ class ChatBotActivity : ComponentActivity() {
                             modifier = Modifier
                             .fillMaxSize()
                         ) {
-                            ChatToolBar()
+                            ChatToolBar(
+                                onMenuClicked = {},
+                                onIconClicked = {}
+                            )
                             Divider()
                             chatScreen(paddingValues = it)
                         }
@@ -118,7 +124,7 @@ class ChatBotActivity : ComponentActivity() {
                 Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp ),
+                    .padding(horizontal = 8.dp),
                 reverseLayout = true,
             ) {
                 itemsIndexed(chatState.chatList) { index, chat ->
@@ -134,6 +140,10 @@ class ChatBotActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+            // Show "typing" indicator when isTyping is true
+            if (chatState.isTyping) {
+                BotTypingIndicator()
             }
             Row(
                 modifier =
@@ -225,7 +235,10 @@ class ChatBotActivity : ComponentActivity() {
 
     ) {
         Column(
-            modifier = Modifier.padding(start = 100.dp, bottom = 16.dp),
+            modifier = Modifier
+                .padding(start = 100.dp, bottom = 16.dp)
+                .padding(top = 16.dp),
+
         ) {
             bitmap?.let {
                 Image(
@@ -241,6 +254,7 @@ class ChatBotActivity : ComponentActivity() {
                 )
             }
 
+            SelectionContainer {
             Text(
                 modifier =
                 Modifier
@@ -251,7 +265,9 @@ class ChatBotActivity : ComponentActivity() {
                 text = prompt,
                 fontSize = 17.sp,
                 color = Color.White,
+                overflow = TextOverflow.Ellipsis
             )
+          }
         }
     }
 
@@ -274,6 +290,7 @@ class ChatBotActivity : ComponentActivity() {
                 //  contentScale = ContentScale.Crop
             )
 
+            SelectionContainer {
                 Text(
                     modifier =
                     Modifier
@@ -284,7 +301,9 @@ class ChatBotActivity : ComponentActivity() {
                     text = response,
                     fontSize = 17.sp,
                     color = txt,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
 
         }
     }

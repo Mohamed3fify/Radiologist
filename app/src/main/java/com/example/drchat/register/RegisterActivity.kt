@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +45,7 @@ import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.utils.ChatAuthButton
 import com.example.drchat.utils.ChatAuthTextField
-import com.example.drchat.utils.ChatToolbar
+import com.example.drchat.utils.Toolbar
 import com.example.drchat.utils.CustomDialog
 import com.example.drchat.utils.LoadingDialog
 
@@ -58,10 +56,9 @@ class RegisterActivity : ComponentActivity() {
             DrChatTheme {
                 RegisterContent(onRegistrationSuccess = {
                     finishAffinity()
-                }) {
+                }){
                     finish()
                 }
-
             }
         }
     }
@@ -75,15 +72,17 @@ fun RegisterContent(
 ) {
     // new
     val accountAlreadyExists by viewModel.accountAlreadyExists.collectAsState()
+
     val confirmPasswordState = remember { mutableStateOf("") }
     val confirmPasswordErrorState = remember { mutableStateOf<String?>(null) }
 
     Scaffold(topBar = {
-        ChatToolbar(title = stringResource(id = R.string.register)) {
+        Toolbar(title = stringResource(id = R.string.register)) {
             onFinish()
         }
     }) { paddingValues ->
         paddingValues
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -103,98 +102,102 @@ fun RegisterContent(
             }
 
             Spacer(Modifier.fillMaxHeight(0.10F))
-            ChatAuthTextField(
-                state = viewModel.firstNameState,
-                error = viewModel.firstNameErrorState.value,
-                label = stringResource(
-                    R.string.first_name
-                ),
 
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ChatAuthTextField(
-                state = viewModel.emailState,
-                error = viewModel.emailErrorState.value,
-                label = stringResource(id = R.string.email)
+                ChatAuthTextField(
+                    state = viewModel.firstNameState,
+                    error = viewModel.firstNameErrorState.value,
+                    label = stringResource(
+                        R.string.first_name
+                    ),
 
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ChatAuthTextField(
-                state = viewModel.passwordState,
-                error = viewModel.passwordErrorState.value,
-                label = stringResource(id = R.string.password),
-                isPassword = true
-            )
+                    )
+                Spacer(modifier = Modifier.height(8.dp))
+                ChatAuthTextField(
+                    state = viewModel.emailState,
+                    error = viewModel.emailErrorState.value,
+                    label = stringResource(id = R.string.email)
 
-            //new
-            Spacer(modifier = Modifier.height(8.dp))
-            ChatAuthTextField(
-                state = viewModel.confirmPasswordState,
-                error = viewModel.confirmPasswordErrorState.value,
-                label = stringResource(id = R.string.confirm_password),
-                isPassword = true
-            )
-
-
-            Spacer(modifier = Modifier.height(12.dp),
                 )
-            ChatAuthButton(title = stringResource(R.string.create_account),
-
-            ) {
-                viewModel.register()
-            }
-
-
-             Spacer(modifier = Modifier.height(12.dp))
-
-            // new
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 5.dp)
-            ) {
-                Text(
-                    text = "Already have an account ?",
-                    color = Color.White,
-                    fontSize = 17.sp
-                    //modifier = Modifier.padding(start = 8.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                ChatAuthTextField(
+                    state = viewModel.passwordState,
+                    error = viewModel.passwordErrorState.value,
+                    label = stringResource(id = R.string.password),
+                    isPassword = true
                 )
 
-                // Spacer(modifier = Modifier.width(16.dp)) // Add space between text and button
+                //new
+                Spacer(modifier = Modifier.height(8.dp))
+                ChatAuthTextField(
+                    state = viewModel.confirmPasswordState,
+                    error = viewModel.confirmPasswordErrorState.value,
+                    label = stringResource(id = R.string.confirm_password),
+                    isPassword = true
+                )
 
-                TextButton(
-                    onClick = {
-                        viewModel.navigateToLogin()
-                    },
-                    // modifier = Modifier.padding(1.dp)
+
+                Spacer(
+                    modifier = Modifier.height(12.dp),
+                )
+                ChatAuthButton(
+                    title = stringResource(R.string.create_account),
+
+                    ) {
+                    viewModel.register()
+                }
+
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // new
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 5.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.login),
-                        color = Color.Red,
-                        fontSize = 17.sp,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold
-                        )
+                        text = "Already have an account ?",
+                        color = Color.White,
+                        fontSize = 17.sp
+                        //modifier = Modifier.padding(start = 8.dp)
                     )
+
+                    // Spacer(modifier = Modifier.width(16.dp)) // Add space between text and button
+
+                    TextButton(
+                        onClick = {
+                            viewModel.navigateToLogin()
+                        },
+                        // modifier = Modifier.padding(1.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.login),
+                            color = Color.Red,
+                            fontSize = 17.sp,
+                            style = TextStyle(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
-            }
+
 
 
         }
-    }
-    TriggerEvent(event = viewModel.events.value) {
-        onRegistrationSuccess()
-    }
-    LoadingDialog(isLoading = viewModel.isLoading)
+        TriggerEvent(event = viewModel.events.value) {
+            onRegistrationSuccess()
+        }
+        LoadingDialog(isLoading = viewModel.isLoading)
 
-    if (accountAlreadyExists) {
-        CustomDialog(
-            title = "Account Already Exists",
-            message = "An account with this email already exists.",
-            onDismiss = {
-                viewModel.resetEvent()
-                viewModel.resetAccountAlreadyExists()
-            }
-        )
+        if (accountAlreadyExists) {
+            CustomDialog(
+                title = "Account Already Exists",
+                message = "An account with this email already exists.",
+                onDismiss = {
+                    viewModel.resetEvent()
+                    viewModel.resetAccountAlreadyExists()
+                }
+            )
+        }
     }
 
 

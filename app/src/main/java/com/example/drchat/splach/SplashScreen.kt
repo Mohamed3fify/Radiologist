@@ -40,26 +40,30 @@ class SplashScreen : ComponentActivity() {
 }
 
 @Composable
-fun SplachContect(viewModel: SplachViewModel = viewModel(), onFinish: () -> Unit) {
-
+fun SplachContect(
+    viewModel: SplachViewModel = viewModel(),
+    onFinish: () -> Unit,
+) {
     LaunchedEffect(key1 = Unit) {
         Handler(Looper.getMainLooper()).postDelayed(
             {
                 viewModel.navigate()
-            }, 1000
+            },
+            1000,
         )
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Grey),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Grey),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "App logo"
+            contentDescription = "App logo",
         )
     }
     TriggerEvents(event = viewModel.event.value) {
@@ -71,7 +75,7 @@ fun SplachContect(viewModel: SplachViewModel = viewModel(), onFinish: () -> Unit
 fun TriggerEvents(
     event: SplachEvent,
     viewModel: SplachViewModel = viewModel(),
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
 ) {
     val context = LocalContext.current
     when (event) {
@@ -93,7 +97,6 @@ fun TriggerEvents(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun SplachPreview() {
+private fun splachPreview() {
     SplachContect {}
 }
-

@@ -84,7 +84,7 @@ class ChatBotActivity : ComponentActivity() {
             DrChatTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
+                    color = Grey,
                 ) {
                     Scaffold {
                         Column(

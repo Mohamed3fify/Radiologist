@@ -43,7 +43,7 @@ fun ChatToolBar(
         Surface(
             shadowElevation = 4.dp,
             tonalElevation = 0.dp,
-            color = black
+            color = Grey
         ) {
             CenterAlignedTopAppBar(
                 title = {

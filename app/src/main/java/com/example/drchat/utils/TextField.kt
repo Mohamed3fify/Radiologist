@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.drchat.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.drchat.ui.theme.blue
@@ -43,11 +44,11 @@ import com.example.drchat.ui.theme.blue
 fun ChatAuthTextField(
     state: MutableState<String>,
     error: String?,
-    label: String,
+    label: Pair<String, ImageVector>,
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
 
-) {
+    ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth(0.9F)) {
@@ -71,12 +72,23 @@ fun ChatAuthTextField(
             ),
 
             label = {
+
+                Row() {
+                Icon(
+                    imageVector = label.second,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = label , fontSize = 12.sp  ,
+                    text = label.first,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.White,
-                    modifier = Modifier.clickable{}
+                    modifier = Modifier.clickable {}
                 )
+             }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
 

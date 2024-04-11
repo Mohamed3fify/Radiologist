@@ -17,6 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -73,8 +78,15 @@ fun RegisterContent(
     // new
     val accountAlreadyExists by viewModel.accountAlreadyExists.collectAsState()
 
-    val confirmPasswordState = remember { mutableStateOf("") }
-    val confirmPasswordErrorState = remember { mutableStateOf<String?>(null) }
+    fun String.getIcon(): ImageVector {
+        return when (this) {
+            "first name" -> Icons.Filled.AccountCircle
+            "email" -> Icons.Filled.Email
+            "Password" -> Icons.Filled.Lock
+            else -> Icons.Default.Email
+        }
+    }
+
 
     Scaffold(topBar = {
         Toolbar(title = stringResource(id = R.string.register)) {
@@ -90,7 +102,7 @@ fun RegisterContent(
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            Spacer(modifier = Modifier.fillMaxHeight(0.10F)) // Add padding below ChatToolbar
+            Spacer(modifier = Modifier.fillMaxHeight(0.10F))
             Box() {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
@@ -106,23 +118,21 @@ fun RegisterContent(
                 ChatAuthTextField(
                     state = viewModel.firstNameState,
                     error = viewModel.firstNameErrorState.value,
-                    label = stringResource(
-                        R.string.first_name
-                    ),
+                    label = stringResource(R.string.first_name)  to stringResource(R.string.first_name).getIcon() ,
 
                     )
                 Spacer(modifier = Modifier.height(8.dp))
                 ChatAuthTextField(
                     state = viewModel.emailState,
                     error = viewModel.emailErrorState.value,
-                    label = stringResource(id = R.string.email)
+                    label = stringResource(id = R.string.email)  to stringResource(R.string.email).getIcon(),
 
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 ChatAuthTextField(
                     state = viewModel.passwordState,
                     error = viewModel.passwordErrorState.value,
-                    label = stringResource(id = R.string.password),
+                    label = stringResource(id = R.string.password)  to stringResource(R.string.password).getIcon(),
                     isPassword = true
                 )
 
@@ -131,7 +141,7 @@ fun RegisterContent(
                 ChatAuthTextField(
                     state = viewModel.confirmPasswordState,
                     error = viewModel.confirmPasswordErrorState.value,
-                    label = stringResource(id = R.string.confirm_password),
+                    label = stringResource(id = R.string.confirm_password)  to stringResource(R.string.password).getIcon(),
                     isPassword = true
                 )
 

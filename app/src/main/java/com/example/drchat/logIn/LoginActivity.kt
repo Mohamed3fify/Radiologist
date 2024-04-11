@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -24,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +63,15 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) {
+
+    fun String.getIcon(): ImageVector {
+        return when (this) {
+            "first name" -> Icons.Filled.AccountCircle
+            "email" -> Icons.Filled.Email
+            "Password" -> Icons.Filled.Lock
+            else -> Icons.Default.AccountCircle
+        }
+    }
 
     Scaffold(topBar = {
         Toolbar(title = stringResource(id = R.string.login))
@@ -100,15 +114,13 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
             ChatAuthTextField(
                 state = viewModel.emailState,
                 error = viewModel.emailErrorState.value,
-                label = stringResource(
-                    R.string.email
-                )
+                label = stringResource(R.string.email) to stringResource(R.string.email).getIcon()
             )
             Spacer(modifier = Modifier.height(8.dp))
             ChatAuthTextField(
                 state = viewModel.passwordState,
                 error = viewModel.passwordErrorState.value,
-                label = stringResource(R.string.password),
+                label = stringResource(R.string.password) to stringResource(R.string.password).getIcon(),
                 isPassword = true
             )
             Spacer(modifier = Modifier.height(16.dp))

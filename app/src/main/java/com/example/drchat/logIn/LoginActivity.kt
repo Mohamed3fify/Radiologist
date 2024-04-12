@@ -25,6 +25,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +53,7 @@ import com.example.drchat.utils.ChatAuthTextField
 import com.example.drchat.utils.LoadingDialog
 import com.example.drchat.utils.Toolbar
 
+
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +69,9 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) {
+    val loginSuccess by viewModel.loginSuccess.collectAsState()
+    var showLoginSuccessDialog by remember { mutableStateOf(false) }
+
 
     fun String.getIcon(): ImageVector {
         return when (this) {
@@ -163,11 +172,33 @@ fun loginContent(viewModel: LoginViewModel = viewModel(), onFinish: () -> Unit) 
         }
     }
     TriggerEvents(event = viewModel.events.value) {
-        onFinish()
+            onFinish()
     }
+
     LoadingDialog(isLoading = viewModel.isLoading)
+    if (loginSuccess) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.resetEvent()
+                showLoginSuccessDialog = false
 
-
+                },
+            title = { Text("Login Successful") },
+            text = { Text("You have successfully logged in.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.resetEvent()
+                        viewModel.resetLoginSuccesss()
+                        onFinish()
+                        showLoginSuccessDialog = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -177,28 +208,11 @@ fun TriggerEvents(
     onFinish: () -> Unit
 ) {
     val context = LocalContext.current
+
+
     when (event) {
         LoginEvent.Idle -> {}
 
-        // new
-        is LoginEvent.LoginSuccess -> {
-            AlertDialog(
-                onDismissRequest = { viewModel.resetEvent() },
-                title = { Text("Login Successful") },
-                text = { Text("You have successfully logged in.") },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            viewModel.resetEvent()
-                            viewModel.resetLoginSuccess()
-                            onFinish()
-                        }
-                    ) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
         is LoginEvent.LoginFailed -> {
             AlertDialog(
                 onDismissRequest = { viewModel.resetEvent() },

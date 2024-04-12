@@ -6,9 +6,10 @@ import com.example.drchat.model.AppUser
     data object Idle : LoginEvent
     data object NavigateToRegister : LoginEvent
     data class NavigateToChatBot(val user: AppUser) : LoginEvent
-    data object LoginSuccess : LoginEvent
+
 
     data object LoginFailed : LoginEvent
+
 
 
 

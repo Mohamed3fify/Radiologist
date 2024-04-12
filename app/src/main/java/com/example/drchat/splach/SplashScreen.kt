@@ -15,8 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,20 +89,6 @@ fun SplachContect(
                 contentDescription = "App logo",
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        AnimatedVisibility(
-            visible = logoVisible.value,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ){
-        Text(
-            text = "Dr Chat",
-            style = TextStyle(
-                color = Color.White,
-                fontSize = 30.sp ,
-                fontWeight = FontWeight.SemiBold
-            )
-        )}
 
     }
     TriggerEvents(event = viewModel.event.value) {

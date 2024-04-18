@@ -4,13 +4,11 @@ import com.example.drchat.logIn.google.UserData
 import com.example.drchat.model.ChatState
 import com.example.drchat.model.AppUser
 import com.example.drchat.model.Conversation
-import com.example.drchat.model.DataUtils.firebaseUser
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -40,7 +38,7 @@ object FirebaseUtils {
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
     }
-    fun getSignInUser() : UserData? = auth.currentUser?.run{
+    fun getGoogleSignInUser() : UserData? = auth.currentUser?.run{
         UserData(
             userId = uid,
             userName = displayName,

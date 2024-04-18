@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drchat.data.Chat
 import com.example.drchat.data.ChatData
-import kotlinx.coroutines.delay
+import com.example.drchat.model.ChatState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -86,5 +86,4 @@ class ChatViewModel : ViewModel() {
             onEvent(ChatUiEvent.BotTyping)
         }
     }
-
 }

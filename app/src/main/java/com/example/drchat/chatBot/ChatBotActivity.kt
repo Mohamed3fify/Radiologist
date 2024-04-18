@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +61,10 @@ import coil.size.Size
 import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
+import com.example.drchat.ui.theme.botResponse
 import com.example.drchat.ui.theme.txt
 import com.example.drchat.utils.BotTypingIndicator
+import com.example.drchat.utils.ChatInputTextField
 import com.example.drchat.utils.ChatToolBar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -110,6 +113,7 @@ class ChatBotActivity : ComponentActivity() {
         val chatViewModel = viewModel<ChatViewModel>()
         val chatState = chatViewModel.chatState.collectAsState().value
         val bitmap = getBitmap()
+
 
         Column(
             modifier =
@@ -165,65 +169,30 @@ class ChatBotActivity : ComponentActivity() {
                             bitmap = it.asImageBitmap(),
                         )
                     }
-                    Icon(
-                        modifier =
-                        Modifier
-                            .size(40.dp)
-                            .clickable {
-                                imagePicker.launch(
-                                    PickVisualMediaRequest
-                                        .Builder()
-                                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        .build(),
-                                )
-                            },
-                        imageVector = Icons.Rounded.AddPhotoAlternate,
-                        contentDescription = "Add Photo",
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+
                 }
                 Spacer(modifier = Modifier.width(8.dp))
 
-                OutlinedTextField(
+                ChatInputTextField(
                     modifier = Modifier.weight(1f),
-                    textStyle =
-                        TextStyle(
-                            color = Color.White,
-                            fontSize = 18.sp,
-                        ),
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            errorContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White,
-                        ),
-                    value = chatState.prompt,
-                    onValueChange = {
-                        chatViewModel.onEvent(ChatUiEvent.UpdatePrompt(it))
-                    },
-                    placeholder = {
-                        Text(
-                            text = "message",
-                            color = Color.White,
+                    text = chatState.prompt,
+                    onTextChanged = { newPrompt -> chatViewModel.onEvent(ChatUiEvent.UpdatePrompt(newPrompt)) },
+                    onImagePickerClicked = {
+                        imagePicker.launch(
+                            PickVisualMediaRequest
+                                .Builder()
+                                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                .build(),
                         )
                     },
+                    onSendClicked = {
+                        chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
+                        uriState.update { "" }
+                    }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Icon(
-                    modifier =
-                    Modifier
-                        .size(40.dp)
-                        .clickable {
-                            chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
-                            uriState.update { "" }
-                        },
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Send prompt",
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+
             }
         }
     }
@@ -296,7 +265,7 @@ class ChatBotActivity : ComponentActivity() {
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(com.example.drchat.ui.theme.botItem)
+                        .background(botResponse)
                         .padding(16.dp),
                     text = response,
                     fontSize = 17.sp,
@@ -331,5 +300,8 @@ class ChatBotActivity : ComponentActivity() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun botPreview() {
+fun ChatPreview() {
+
 }
+
+

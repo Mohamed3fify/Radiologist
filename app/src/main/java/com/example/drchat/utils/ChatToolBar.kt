@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -78,7 +79,7 @@ fun ChatToolBar(
 
                 navigationIcon = {
                     IconButton(
-                        onClick = onMenuClicked,
+                        onClick = {  },
                     ) {
                         Icon(
                             Icons.Filled.Menu,
@@ -123,7 +124,7 @@ fun ChatToolBar(
 @Composable
 fun AppBarPreview() {
     ChatToolBar(
-        onMenuClicked = { },
+        onMenuClicked ={} ,
         onIconClicked = { }
     )
 }

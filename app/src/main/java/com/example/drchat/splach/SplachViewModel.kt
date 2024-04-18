@@ -3,14 +3,26 @@ package com.example.drchat.splach
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.drchat.FirebaseUtils
+import com.example.drchat.database.FirebaseUtils
+import com.example.drchat.database.FirebaseUtils.getSignInUser
+import com.example.drchat.logIn.google.SignInResult
+import com.example.drchat.logIn.google.UserData
 import com.example.drchat.model.AppUser
+import com.example.drchat.model.DataUtils
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class SplachViewModel : ViewModel() {
     val event = mutableStateOf<SplachEvent>(SplachEvent.Idle)
     private val auth = Firebase.auth
+    private val firestore = Firebase.firestore
+
+    init {
+        checkUserAuthentication()
+    }
 
 
     fun navigate() {
@@ -25,13 +37,73 @@ class SplachViewModel : ViewModel() {
     }
 
     private fun getUserFromFireStore(uid: String) {
-        FirebaseUtils.getUser(uid, onSuccessListener = { docSnapshot ->
+       /* FirebaseUtils.getUser(uid, onSuccessListener = { docSnapshot ->
             val user = docSnapshot.toObject(AppUser::class.java)
+
+            DataUtils.appUser = user
             navigateToChatBot(user!!)
+
         }, onFailureListener = {
             Log.e("TAG", "getUserFromFirestore: ${it.message}")
             navigateToLogin()
-        })
+        })*/
+
+        val userRef = firestore.collection("users").document(uid)
+        userRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val user = documentSnapshot.toObject(AppUser::class.java)
+                    if (user != null) {
+                        DataUtils.appUser = user
+                        navigateToChatBot(user)
+                    } else {
+                        // User document is corrupted or empty, navigate to login
+                        navigateToLogin()
+                    }
+                } else {
+                    // User document does not exist, save user and navigate to chatbot
+                    saveUserAndNavigateToChatbot()
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("TAG", "getUserFromFirestore: ${exception.message}")
+                navigateToLogin()
+            }
+    }
+
+    private fun saveUserAndNavigateToChatbot() {
+        val currentUser = getSignInUser()
+        if (currentUser != null) {
+            val appUser = AppUser(
+                uid = currentUser.userId,
+                email = "", // You may need to modify this depending on your AppUser class
+                displayName = currentUser.userName,
+                // Add other necessary fields
+            )
+            FirebaseUtils.addUser(appUser,
+                {
+                    DataUtils.appUser = appUser
+                    navigateToChatBot(appUser)
+                },
+                {
+                    Log.e("TAG", "Failed to save user to Firestore: ${it.message}")
+                    navigateToLogin()
+                }
+            )
+        } else {
+            Log.e("TAG", "Current user is null")
+            navigateToLogin()
+        }
+    }
+
+    private fun checkUserAuthentication() {
+        if (auth.currentUser != null) {
+            // User is authenticated, retrieve user data from Firestore
+            getUserFromFireStore(auth.currentUser!!.uid)
+        } else {
+            // User is not authenticated, navigate to login
+            navigateToLogin()
+        }
     }
 
     private fun navigateToLogin() {

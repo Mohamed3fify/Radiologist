@@ -5,8 +5,9 @@ import android.util.Patterns
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.drchat.FirebaseUtils
+import com.example.drchat.database.FirebaseUtils
 import com.example.drchat.model.AppUser
+import com.example.drchat.model.DataUtils
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -59,13 +60,14 @@ class RegisterViewModel : ViewModel() {
         val user = AppUser(uid, firstNameState.value, emailState.value)
         FirebaseUtils.addUser(user, onSuccessListener = {
             isLoading.value = false
+            DataUtils.appUser = user
             // events.value = RegisterEvent.NavigateToChatBot(user)  , // to navigate to chat bot after create the account
             events.value =
                 RegisterEvent.NavigateToLogin   // , to navigate to login after create the account
-        }, onFailureListener = {
+        }) {
             isLoading.value = false
             Log.e("Tag", "addUserToFirestore: ${it.message}")
-        })
+        }
     }
 
     private fun validateFields(): Boolean {

@@ -1,5 +1,6 @@
 package com.example.drchat.utils
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,24 +16,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.blue
+import com.example.drchat.ui.theme.botItem
+
 
 @Composable
 fun LoadingDialog(isLoading: MutableState<Boolean>) {
     if (isLoading.value)
         Dialog(onDismissRequest = { isLoading.value = false }) {
             CircularProgressIndicator(
-                color = blue,
+                color = Color.White,
                 modifier = Modifier
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .background(botItem, shape = RoundedCornerShape(8.dp))
                     .padding(36.dp)
                     .size(80.dp),
                 strokeWidth = 4.dp,
             )
         }
-
 }
-
-
 
 

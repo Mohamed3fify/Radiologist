@@ -1,5 +1,6 @@
 package com.example.drchat.utils
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,14 +10,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -34,10 +39,15 @@ import androidx.compose.ui.unit.sp
 import com.example.drchat.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.blue
+import com.example.drchat.ui.theme.botItem
+import com.example.drchat.ui.theme.botResponse
 
 
 @Composable
@@ -143,7 +153,7 @@ fun BotTypingIndicator() {
     ) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = com.example.drchat.ui.theme.botItem,
+            color = botItem,
             modifier = Modifier.padding(16.dp)
         ) {
             Row(
@@ -163,6 +173,86 @@ fun BotTypingIndicator() {
         }
     }
 }
+
+@Composable
+fun ChatInputTextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextChanged: (String) -> Unit,
+    onImagePickerClicked: () -> Unit,
+    onSendClicked: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(40.dp),
+        color = botResponse,
+        modifier =
+        Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(bottom = 2.dp, start = 4.dp, end = 4.dp, top = 1.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            ) {
+            OutlinedTextField(
+                modifier = Modifier.weight(1f),
+                textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    cursorColor = Color.White,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                ),
+                value = text,
+                onValueChange = onTextChanged,
+                placeholder = {
+                    Text(text = "Type a message...", color = Color.Gray)
+                },
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onImagePickerClicked)
+
+            ) {
+                Icon(
+                    modifier = Modifier.align(Alignment.Center),
+                    imageVector = Icons.Rounded.AddPhotoAlternate,
+                    contentDescription = "Add Photo",
+                    tint = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onSendClicked)
+
+            ) {
+                Icon(
+                    modifier = Modifier.align(Alignment.Center),
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send",
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+ fun ChatInputPreview(){
+    ChatInputTextField(
+        text = "",
+        onTextChanged = {},
+        onImagePickerClicked = { },
+
+    ) {}
+}
+
 
 
 

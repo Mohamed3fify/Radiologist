@@ -24,6 +24,7 @@ import com.example.drchat.R
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.blue
 import com.example.drchat.ui.theme.light_blue
+import com.example.drchat.ui.theme.main_app
 import com.example.drchat.ui.theme.shadowColor
 
 @Composable
@@ -38,7 +39,7 @@ fun ChatAuthButton(
             .fillMaxWidth(0.9F)
             .shadow(
                 shape = RoundedCornerShape(
-                    6.dp
+                    40.dp
                 ),
                 elevation = 5.dp,
                 ambientColor =shadowColor,
@@ -49,8 +50,8 @@ fun ChatAuthButton(
         contentPadding = PaddingValues(horizontal = 36.dp, vertical = 18.dp),
         shape = RoundedCornerShape(6.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isEnabled) light_blue else Color.White,
-            contentColor = if (isEnabled) Color.Black else Grey
+            containerColor = if (isEnabled) main_app else Color.White,
+            contentColor = if (isEnabled) Color.White else Grey
         )
     ) {
         Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)

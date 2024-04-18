@@ -23,3 +23,5 @@ val light_blue = Color(0xFF1CD6CE)
 val userItem = Color(0xFFA83B78)
 val botItem = Color(0xFF444444)
 val txt = Color(0xFFF0F0F0)
+
+val main_app = Color(0xFF324EFF)

@@ -13,4 +13,8 @@
     <string name="create_account"> create account </string>
     <string name="sign_up"> SignUp </string>
     <string name="title_activity_register">RegisterActivity</string>
+
+    <string name="google_client_id">629129754377-5qvsk5nea3n6j9k30u0tbta521foce9d.apps.googleusercontent.com</string>
+
+
 </resources>

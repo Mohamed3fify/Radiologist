@@ -4,7 +4,6 @@ plugins {
     id("com.google.gms.google-services")
 
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
     id("kotlinx-serialization")
     id("kotlin-parcelize")
 }
@@ -84,10 +83,10 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("androidx.compose.material:material-icons-extended:1.6.4")
+    implementation("androidx.compose.material:material-icons-extended:1.6.5")
 
     // Android  AI SDK
-    implementation("com.google.ai.client.generativeai:generativeai:0.2.1")
+    implementation("com.google.ai.client.generativeai:generativeai:0.3.0")
     
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation ("androidx.navigation:navigation-compose:2.7.7")
@@ -98,11 +97,10 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
 
-    //hilt
-    implementation("com.google.dagger:hilt-android:2.49")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // Google SignIn
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-    kapt("com.google.dagger:hilt-compiler:2.44")
+
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
@@ -122,15 +120,6 @@ dependencies {
 
     // System bars customization
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
-    implementation("androidx.compose.ui:ui-viewbinding:1.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+   
 
-    // dependencies for ML
-    implementation("org.tensorflow:tensorflow-lite:2.5.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.1.0")
-
-}
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
 }

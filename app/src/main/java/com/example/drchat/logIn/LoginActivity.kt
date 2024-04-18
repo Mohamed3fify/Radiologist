@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.drchat.R
 import com.example.drchat.chatBot.ChatBotActivity
+import com.example.drchat.logIn.google.GoogleAuthUiClient
 import com.example.drchat.register.RegisterActivity
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
@@ -87,7 +88,10 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun loginContent(viewModel: LoginViewModel   = viewModel(),  onFinish: () -> Unit) {
+fun loginContent(
+    viewModel: LoginViewModel   = viewModel(),
+    onFinish: () -> Unit
+) {
 
     val loginSuccess by viewModel.loginSuccess.collectAsState()
     var showLoginSuccessDialog by remember { mutableStateOf(false) }

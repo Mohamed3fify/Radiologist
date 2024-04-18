@@ -115,7 +115,7 @@ class LoginViewModel : ViewModel() {
     }
 
     // Google SignIn
-    fun onSignInResult(result: SignInResult){
+    fun onSignInResult(result : SignInResult){
         _state.update { it.copy(
             isSignInSuccessful = result.data != null,
             signInError = result.errorMessage

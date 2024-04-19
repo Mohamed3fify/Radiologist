@@ -21,7 +21,7 @@ class ChatViewModel : ViewModel() {
             is ChatUiEvent.SendPrompt -> {
                 if (event.prompt.isNotEmpty()) {
                     _chatState.update {
-                        it.copy(isTyping = true) // Show typing indicator
+                        it.copy(isTyping = true)
                     }
                     addPrompt(event.prompt, event.bitmap)
 

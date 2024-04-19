@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,7 +93,6 @@ fun loginContent(
     viewModel: LoginViewModel   = viewModel(),
     onFinish: () -> Unit
 ) {
-
     val loginSuccess by viewModel.loginSuccess.collectAsState()
     var showLoginSuccessDialog by remember { mutableStateOf(false) }
 
@@ -133,7 +133,6 @@ fun loginContent(
                         // Sign-in with Google successful, now launch the chatbot activity
                         account = GoogleSignIn.getLastSignedInAccount(context)
                         launchChatBotActivity()
-
                     } else {
                         Log.e("TAG", "Google Sign in Failed")
                     }

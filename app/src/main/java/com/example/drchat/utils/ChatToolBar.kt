@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -32,13 +31,12 @@ import androidx.compose.ui.unit.sp
 import com.example.drchat.R
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
-import com.example.drchat.ui.theme.black
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatToolBar(
     onMenuClicked: () -> Unit,
-    onIconClicked: () -> Unit
+    onAddClicked: () -> Unit
 ) {
     DrChatTheme {
         Surface(
@@ -79,7 +77,7 @@ fun ChatToolBar(
 
                 navigationIcon = {
                     IconButton(
-                        onClick = {  },
+                        onClick = onMenuClicked,
                     ) {
                         Icon(
                             Icons.Filled.Menu,
@@ -106,7 +104,7 @@ fun ChatToolBar(
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
-                    onClick = onIconClicked
+                    onClick = onAddClicked
                 ) {
                     Image(
                         painter = painterResource(R.drawable.add),
@@ -125,6 +123,6 @@ fun ChatToolBar(
 fun AppBarPreview() {
     ChatToolBar(
         onMenuClicked ={} ,
-        onIconClicked = { }
+        onAddClicked = { }
     )
 }

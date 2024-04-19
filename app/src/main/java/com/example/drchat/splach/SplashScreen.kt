@@ -46,7 +46,7 @@ class SplashScreen : ComponentActivity() {
 
 @Composable
 fun SplachContect(
-    viewModel: SplachViewModel = viewModel(),
+    viewModel: SplashViewModel = viewModel(),
     onFinish: () -> Unit,
 ) {
     val logoVisible = remember { mutableStateOf(true) }
@@ -90,7 +90,7 @@ fun SplachContect(
 @Composable
 fun TriggerEvents(
     event: SplachEvent,
-    viewModel: SplachViewModel = viewModel(),
+    viewModel: SplashViewModel = viewModel(),
     onFinish: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -109,6 +109,7 @@ fun TriggerEvents(
             onFinish()
         }
     }
+
 }
 
 @Preview(showSystemUi = true, showBackground = true)

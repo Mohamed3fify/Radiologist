@@ -9,8 +9,8 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,18 +25,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -47,7 +39,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -96,7 +87,7 @@ class ChatBotActivity : ComponentActivity() {
                         ) {
                             ChatToolBar(
                                 onMenuClicked = {},
-                                onIconClicked = {}
+                                onAddClicked = {}
                             )
                             Divider()
                             chatScreen(paddingValues = it)
@@ -136,7 +127,6 @@ class ChatBotActivity : ComponentActivity() {
                         userItem(
                             prompt = chat.prompt,
                             bitmap = chat.bitmap,
-
                         )
                     } else {
                         botItem(
@@ -201,7 +191,6 @@ class ChatBotActivity : ComponentActivity() {
     fun userItem(
         prompt: String,
         bitmap: Bitmap?,
-
     ) {
         Column(
             modifier = Modifier
@@ -210,10 +199,16 @@ class ChatBotActivity : ComponentActivity() {
 
         ) {
             bitmap?.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .height(260.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ){
                 Image(
                     modifier =
                     Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .height(260.dp)
                         .padding(bottom = 2.dp)
                         .clip(RoundedCornerShape(12.dp)),
@@ -222,12 +217,13 @@ class ChatBotActivity : ComponentActivity() {
                     bitmap = it.asImageBitmap(),
                 )
             }
+            }
 
             SelectionContainer {
             Text(
                 modifier =
                 Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .clip(RoundedCornerShape(12.dp))
                     .background(com.example.drchat.ui.theme.userItem)
                     .padding(16.dp),

@@ -11,7 +11,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class SplachViewModel : ViewModel() {
+class SplashViewModel : ViewModel() {
     val event = mutableStateOf<SplachEvent>(SplachEvent.Idle)
     private val auth = Firebase.auth
     private val firestore = Firebase.firestore

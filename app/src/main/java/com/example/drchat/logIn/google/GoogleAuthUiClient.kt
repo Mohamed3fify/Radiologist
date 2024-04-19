@@ -23,7 +23,7 @@ class GoogleAuthUiClient(
 
     private val auth = Firebase.auth
 
-    suspend fun sigIn() : IntentSender?{
+     suspend fun sigIn() : IntentSender?{
         val result = try {
             oneTapClient.beginSignIn(
                 buildSignInRequest()
@@ -77,13 +77,6 @@ class GoogleAuthUiClient(
         }
     }
 
-    fun getSignInUser() : UserData? = auth.currentUser?.run{
-        UserData(
-            userId = uid,
-            userName = displayName,
-            profilePictureUrl = photoUrl?.toString()
-        )
-    }
     private fun buildSignInRequest() : BeginSignInRequest{
         return BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(

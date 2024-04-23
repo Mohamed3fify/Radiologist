@@ -1,5 +1,6 @@
 package com.example.drchat.chatBot
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -108,7 +109,7 @@ class ChatBotActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Grey,
                 ) {
-                    val navController = rememberNavController()
+
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
                     val context = LocalContext.current
@@ -133,8 +134,9 @@ class ChatBotActivity : ComponentActivity() {
                                                     ).show()
                                                     val intent =
                                                         Intent(context, LoginActivity::class.java)
-                                                    context.startActivity(intent)
-                                                    navController.popBackStack()
+                                                  intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                                   context.startActivity(intent)
+                                                    (context as Activity).finishAffinity()
 
                                                 }
                                             }

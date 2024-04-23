@@ -50,7 +50,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.drchat.R
 import com.example.drchat.chatBot.ChatBotActivity
 import com.example.drchat.register.RegisterActivity
@@ -102,7 +104,7 @@ fun loginContent(
         .requestEmail()
         .build()
     val googleSignInClient = GoogleSignIn.getClient(context,gso)
-        
+
     var account : GoogleSignInAccount? by remember { mutableStateOf(null) }
     val chatBotLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 
@@ -110,13 +112,15 @@ fun loginContent(
 
     fun launchChatBotActivity() {
         val chatBotIntent = Intent(context, ChatBotActivity::class.java)
+        chatBotIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         chatBotLauncher.launch(chatBotIntent)
+        (context as Activity).finishAffinity()
     }
     val isLoading = remember { mutableStateOf(false) }
 
     val launcher  =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
+            contract = ActivityResultContracts.StartActivityForResult(),
         ){
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try {
@@ -129,9 +133,11 @@ fun loginContent(
                         account = GoogleSignIn.getLastSignedInAccount(context)
                         launchChatBotActivity()
                         Toast.makeText(context, "Sign in successfully", Toast.LENGTH_SHORT).show()
+
                     } else {
                         Log.e("TAG", "Google Sign in Failed")
                         Toast.makeText(context, "Sign-in failed", Toast.LENGTH_SHORT).show()
+
                     }
                 }
 
@@ -139,6 +145,7 @@ fun loginContent(
                 Log.w("TAG" , "Google Sign in Failed" , e)
 
             }
+
         }
     LoadingDialog(isLoading)
 
@@ -318,8 +325,9 @@ fun TriggerEvents(
 
         is LoginEvent.NavigateToChatBot -> {
             val intent = Intent(context, ChatBotActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
-            onFinish()
+            (context as Activity).finishAffinity()
         }
 
         LoginEvent.NavigateToRegister -> {

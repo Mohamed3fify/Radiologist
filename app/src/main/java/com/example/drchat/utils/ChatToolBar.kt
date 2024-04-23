@@ -1,6 +1,7 @@
 package com.example.drchat.utils
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +36,7 @@ import com.example.drchat.ui.theme.Grey
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatToolBar(
-    onMenuClicked: () -> Unit,
+    onNavigationIconClick: () -> Unit,
     onAddClicked: () -> Unit
 ) {
     DrChatTheme {
@@ -74,20 +75,20 @@ fun ChatToolBar(
                         }
                     }
                 },
-
                 navigationIcon = {
                     IconButton(
-                        onClick = onMenuClicked,
+                        onClick = onNavigationIconClick,
                     ) {
                         Icon(
                             Icons.Filled.Menu,
-                            "backIcon",
-                            modifier = Modifier.size(26.dp),
+                            "drawerIcon",
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clickable { onNavigationIconClick() },
                             tint = Color.White,
                         )
                     }
                 },
-
 
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = Grey,
@@ -97,10 +98,6 @@ fun ChatToolBar(
             Row(
                 modifier = Modifier
                     .padding(top = 8.dp, bottom = 16.dp)
-
-                //.align(Alignment.CenterEnd
-
-
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
@@ -113,7 +110,6 @@ fun ChatToolBar(
                     )
                 }
             }
-
         }
     }
 }
@@ -122,7 +118,7 @@ fun ChatToolBar(
 @Composable
 fun AppBarPreview() {
     ChatToolBar(
-        onMenuClicked ={} ,
+        onNavigationIconClick ={} ,
         onAddClicked = { }
     )
 }

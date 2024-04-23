@@ -1,34 +1,32 @@
 package com.example.drchat.logIn
 
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,10 +53,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.drchat.R
 import com.example.drchat.chatBot.ChatBotActivity
-import com.example.drchat.logIn.google.GoogleAuthUiClient
 import com.example.drchat.register.RegisterActivity
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
+import com.example.drchat.ui.theme.main_app
 import com.example.drchat.utils.ChatAuthButton
 import com.example.drchat.utils.ChatAuthTextField
 import com.example.drchat.utils.GoogleSignInButton
@@ -74,14 +72,12 @@ import com.google.firebase.ktx.Firebase
 
 
 class LoginActivity : ComponentActivity() {
-
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DrChatTheme {
-                loginContent{
+                loginContent(onLogInSuccess = {finishAffinity()}){
                 }
             }
         }
@@ -91,6 +87,7 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun loginContent(
     viewModel: LoginViewModel   = viewModel(),
+    onLogInSuccess: () -> Unit,
     onFinish: () -> Unit
 ) {
     val loginSuccess by viewModel.loginSuccess.collectAsState()
@@ -122,19 +119,19 @@ fun loginContent(
             contract = ActivityResultContracts.StartActivityForResult()
         ){
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-
             try {
-                
                 account = task.getResult(ApiException::class.java)!!
                 val credential = GoogleAuthProvider.getCredential(account?.idToken,null)
                 Firebase.auth.signInWithCredential(credential).addOnCompleteListener{signInTask ->
-                    isLoading.value =true
+
                     if (signInTask.isSuccessful) {
                         // Sign-in with Google successful, now launch the chatbot activity
                         account = GoogleSignIn.getLastSignedInAccount(context)
                         launchChatBotActivity()
+                        Toast.makeText(context, "Sign in successfully", Toast.LENGTH_SHORT).show()
                     } else {
                         Log.e("TAG", "Google Sign in Failed")
+                        Toast.makeText(context, "Sign-in failed", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -143,12 +140,6 @@ fun loginContent(
 
             }
         }
-    DisposableEffect(key1 = loginSuccess) {
-        if (loginSuccess) {
-            isLoading.value = false
-        }
-        onDispose { }
-    }
     LoadingDialog(isLoading)
 
     fun String.getIcon(): ImageVector {
@@ -161,7 +152,7 @@ fun loginContent(
     }
 
     Scaffold(topBar = {
-        Toolbar(title = stringResource(id = R.string.login))
+        Toolbar(title = "")
 
     })
     { paddingValues ->
@@ -174,29 +165,26 @@ fun loginContent(
                 .background(Grey),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Spacer(modifier = Modifier.fillMaxHeight(0.10F)) // Add padding below ChatToolbar
-            Box {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "App logo",
-                    modifier = Modifier.size(90.dp)
-
-                )
-            }
-
-            Spacer(modifier = Modifier.fillMaxHeight(0.10F))
+            Spacer(modifier = Modifier.height(20.dp))
+      Image(
+          painter = painterResource(id = R.drawable.logo),
+          contentDescription = null ,
+          modifier =
+          Modifier
+              .size(90.dp)
+              .padding(top = 20.dp)
+      )
+            Spacer(modifier = Modifier.fillMaxHeight(0.1F))
             Text(
-                text = "Welcome",
+                text = "Welcome back",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(horizontal = 25.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             ChatAuthTextField(
                 state = viewModel.emailState,
                 error = viewModel.emailErrorState.value,
@@ -213,7 +201,24 @@ fun loginContent(
             ChatAuthButton(title = stringResource(id = R.string.login)) {
                 viewModel.login()
             }
-            Spacer(modifier = Modifier.height(13.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "or",
+                color = Color.White,
+                fontSize = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            GoogleSignInButton(
+                state = state,
+                onClick = {
+                    launcher.launch(googleSignInClient.signInIntent)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +236,7 @@ fun loginContent(
                 ) {
                     Text(
                         text = stringResource(R.string.sign_up),
-                        color = Color.Red,
+                        color = main_app,
                         fontSize = 17.sp,
                         style = TextStyle(
                             fontWeight = FontWeight.Bold
@@ -240,28 +245,6 @@ fun loginContent(
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            ) {
-            Divider(modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 1.dp)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "or",
-                color = Color.White,
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Divider(modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 1.dp)
-
-        }
-            GoogleSignInButton(
-                state = state,
-                onClick = {
-                    launcher.launch(googleSignInClient.signInIntent)
-                }
-            )
         }
     }
 
@@ -269,14 +252,12 @@ fun loginContent(
     TriggerEvents(event = viewModel.events.value) {
             onFinish()
     }
-
     LoadingDialog(isLoading = viewModel.isLoading)
     if (loginSuccess) {
         AlertDialog(
             onDismissRequest = {
                 viewModel.resetEvent()
                 showLoginSuccessDialog = false
-
                 },
             title = { Text("Login Successful") },
             text = { Text("You have successfully logged in.") },
@@ -303,7 +284,6 @@ fun TriggerEvents(
     onFinish: () -> Unit
 ) {
     val context = LocalContext.current
-
 
     when (event) {
         LoginEvent.Idle -> {}
@@ -354,7 +334,5 @@ fun TriggerEvents(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun LoginPreview() {
-    loginContent{
-
-    }
+    loginContent(onLogInSuccess = {}){}
 }

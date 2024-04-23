@@ -1,5 +1,6 @@
 package com.example.drchat.utils
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -63,42 +64,44 @@ fun ChatAuthTextField(
 
     Column(modifier = Modifier.fillMaxWidth(0.9F)) {
 
-
         OutlinedTextField(
             value = state.value,
             onValueChange = { state.value = it },
-            modifier = Modifier.fillMaxWidth(.9F),
-            textStyle = TextStyle(color = Color.White,
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier
+                .fillMaxWidth(1F)
+                .padding(horizontal = 15.dp),
+            textStyle = TextStyle(
+                color = Color.White,
                 fontSize = 17.sp
             ),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = botResponse,
+                unfocusedContainerColor = botResponse,
                 errorContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.White,
+                focusedIndicatorColor = botResponse,
+                unfocusedIndicatorColor = botResponse,
                 errorIndicatorColor = Color.Red,
-
             ),
 
             label = {
 
                 Row() {
-                Icon(
-                    imageVector = label.second,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = label.first,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.White,
-                    modifier = Modifier.clickable {}
-                )
-             }
+                    Icon(
+                        imageVector = label.second,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = label.first,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.White,
+                        modifier = Modifier.clickable {}
+                    )
+                }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
 
@@ -114,11 +117,13 @@ fun ChatAuthTextField(
                 }
             }
         )
+
+
         if (error != null) {
             Text(
                 text = error, color = Color.Red,
                 fontSize = 18.sp,
-                modifier = Modifier.align(androidx.compose.ui.Alignment.Start)
+                modifier = Modifier.align(Alignment.Start)
             )
         }
 
@@ -136,7 +141,7 @@ fun PasswordVisibilityToggle(
         modifier = modifier
     ) {
         Icon(
-            painter = if (isPasswordVisible) painterResource(id = R.drawable.ic_invisible_password) else painterResource(id = R.drawable.iv_visible_password),
+            painter = if (isPasswordVisible) painterResource(id = R.drawable.visibility_off) else painterResource(id = R.drawable.ic_eye_visible),
             contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password",
             tint = Color.White
         )

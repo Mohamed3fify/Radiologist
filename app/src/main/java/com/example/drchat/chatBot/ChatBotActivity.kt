@@ -1,14 +1,18 @@
 package com.example.drchat.chatBot
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +30,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,21 +53,33 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.drchat.R
+import com.example.drchat.database.FirebaseUtils
+import com.example.drchat.logIn.LoginActivity
+import com.example.drchat.logIn.google.GoogleAuthUiClient
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
 import com.example.drchat.ui.theme.botResponse
+import com.example.drchat.ui.theme.main_app
 import com.example.drchat.ui.theme.txt
 import com.example.drchat.utils.BotTypingIndicator
 import com.example.drchat.utils.ChatInputTextField
 import com.example.drchat.utils.ChatToolBar
+import com.example.drchat.utils.DividerrItem
+import com.example.drchat.utils.DrawerBody
+import com.example.drchat.utils.DrawerBottom
+import com.example.drchat.utils.DrawerHeader
+import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class ChatBotActivity : ComponentActivity() {
     private val uriState = MutableStateFlow("")
@@ -74,25 +95,67 @@ class ChatBotActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val googleAuthUiClient by lazy {
+            GoogleAuthUiClient(
+                context = applicationContext,
+                oneTapClient = Identity.getSignInClient(applicationContext)
+            )
+        }
         setContent {
             DrChatTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Grey,
                 ) {
-                    Scaffold {
-                        Column(
-                            modifier = Modifier
-                            .fillMaxSize()
-                        ) {
-                            ChatToolBar(
-                                onMenuClicked = {},
-                                onAddClicked = {}
-                            )
-                            Divider()
+                    val navController = rememberNavController()
+                    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                    val scope = rememberCoroutineScope()
+                    val context = LocalContext.current
+                    ModalNavigationDrawer(
+                        drawerContent = {
+                            ModalDrawerSheet {
+                                FirebaseUtils.getGoogleSignInUser()
+                                    ?.let { DrawerHeader(userData = it) }
+                                DividerrItem()
+                                DrawerBody()
+                                DividerrItem()
+                                FirebaseUtils.getGoogleSignInUser()
+                                    ?.let {
+                                        DrawerBottom(
+                                            onSignOut = {
+                                                lifecycleScope.launch {
+                                                    googleAuthUiClient.signOut()
+                                                    Toast.makeText(
+                                                        applicationContext,
+                                                        "Sign out",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                    val intent =
+                                                        Intent(context, LoginActivity::class.java)
+                                                    context.startActivity(intent)
+                                                    navController.popBackStack()
+
+                                                }
+                                            }
+                                        )
+                                    }
+                            }
+
+                        }, drawerState = drawerState
+                    )
+                    {
+                        Scaffold(topBar = {
+                            Column {
+                                ChatToolBar(
+                                    onNavigationIconClick = { scope.launch { drawerState.open() } }
+                                ) {}
+                                Divider()
+                            }
+                        })
+                        {
                             chatScreen(paddingValues = it)
                         }
-
                     }
                 }
             }
@@ -104,7 +167,6 @@ class ChatBotActivity : ComponentActivity() {
         val chatViewModel = viewModel<ChatViewModel>()
         val chatState = chatViewModel.chatState.collectAsState().value
         val bitmap = getBitmap()
-
 
         Column(
             modifier =
@@ -166,7 +228,13 @@ class ChatBotActivity : ComponentActivity() {
                 ChatInputTextField(
                     modifier = Modifier.weight(1f),
                     text = chatState.prompt,
-                    onTextChanged = { newPrompt -> chatViewModel.onEvent(ChatUiEvent.UpdatePrompt(newPrompt)) },
+                    onTextChanged = { newPrompt ->
+                        chatViewModel.onEvent(
+                            ChatUiEvent.UpdatePrompt(
+                                newPrompt
+                            )
+                        )
+                    },
                     onImagePickerClicked = {
                         imagePicker.launch(
                             PickVisualMediaRequest
@@ -181,8 +249,6 @@ class ChatBotActivity : ComponentActivity() {
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-
-
             }
         }
     }
@@ -192,47 +258,48 @@ class ChatBotActivity : ComponentActivity() {
         prompt: String,
         bitmap: Bitmap?,
     ) {
+
         Column(
             modifier = Modifier
                 .padding(start = 100.dp, bottom = 16.dp)
                 .padding(top = 16.dp),
 
-        ) {
+            ) {
             bitmap?.let {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .height(260.dp)
                         .clip(RoundedCornerShape(12.dp))
-                ){
-                Image(
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .height(260.dp)
-                        .padding(bottom = 2.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentDescription = "image",
-                    contentScale = ContentScale.Crop,
-                    bitmap = it.asImageBitmap(),
-                )
-            }
+                ) {
+                    Image(
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                            .padding(bottom = 2.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentDescription = "image",
+                        contentScale = ContentScale.Crop,
+                        bitmap = it.asImageBitmap(),
+                    )
+                }
             }
 
             SelectionContainer {
-            Text(
-                modifier =
-                Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(com.example.drchat.ui.theme.userItem)
-                    .padding(16.dp),
-                text = prompt,
-                fontSize = 17.sp,
-                color = Color.White,
-                overflow = TextOverflow.Ellipsis
-            )
-          }
+                Text(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(main_app)
+                        .padding(16.dp),
+                    text = prompt,
+                    fontSize = 17.sp,
+                    color = Color.White,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 
@@ -280,10 +347,10 @@ class ChatBotActivity : ComponentActivity() {
         val imageState: AsyncImagePainter.State =
             rememberAsyncImagePainter(
                 model =
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(uri)
-                        .size(Size.ORIGINAL)
-                        .build(),
+                ImageRequest.Builder(LocalContext.current)
+                    .data(uri)
+                    .size(Size.ORIGINAL)
+                    .build(),
             ).state
 
         if (imageState is AsyncImagePainter.State.Success) {

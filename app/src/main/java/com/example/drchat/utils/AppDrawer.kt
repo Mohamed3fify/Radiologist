@@ -124,25 +124,6 @@ private fun DrawerHeader(
 }
 
 @Composable
-private fun ColumnScope.HistoryConversations(
-    onChatClicked: (String) -> Unit,
-    deleteConversation: (String) -> Unit,
-    deleteMessages: (String) -> Unit,
-    currentConversationState: String,
-
-) {
-    val scope = rememberCoroutineScope()
-
-    LazyColumn(
-        Modifier
-            .fillMaxWidth()
-            .weight(1f, false),
-    ) {
-
-    }
-}
-
-@Composable
 private fun DrawerItemHeader(text: String) {
     Box(
         modifier = Modifier

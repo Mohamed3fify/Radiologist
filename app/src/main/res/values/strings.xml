@@ -9,8 +9,8 @@
     <string name="confirm_password"> Confirm Password </string>
     <string name="create"> Create </string>
     <string name="register"> Sign Up </string>
-    <string name="first_name"> first name </string>
-    <string name="create_account"> create account </string>
+    <string name="userName"> first name </string>
+    <string name="create_account"> Sign Up </string>
     <string name="sign_up"> SignUp </string>
     <string name="title_activity_register">RegisterActivity</string>
 

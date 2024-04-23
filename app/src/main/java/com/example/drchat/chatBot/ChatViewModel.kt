@@ -1,12 +1,20 @@
 package com.example.drchat.chatBot
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drchat.data.Chat
 import com.example.drchat.data.ChatData
+import com.example.drchat.database.FirebaseUtils
 import com.example.drchat.model.ChatState
+import com.example.drchat.model.Conversation
+import com.example.drchat.model.Message
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,12 +24,17 @@ class ChatViewModel : ViewModel() {
     private val _chatState = MutableStateFlow(ChatState())
     val chatState = _chatState.asStateFlow()
 
+    private val _conversations = MutableStateFlow<List<Conversation>>(emptyList())
+    val conversations: StateFlow<List<Conversation>> = _conversations
+
+
      fun onEvent(event: ChatUiEvent) {
         when (event) {
             is ChatUiEvent.SendPrompt -> {
                 if (event.prompt.isNotEmpty()) {
                     _chatState.update {
                         it.copy(isTyping = true)
+
                     }
                     addPrompt(event.prompt, event.bitmap)
 

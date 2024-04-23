@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,17 +35,11 @@ fun Toolbar(title: String, onNavigationIconClick: (() -> Unit)? = null) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Grey)
-                .height(70.dp)
+                .height(10.dp)
                 .padding(end = 50.dp)
 
         ) {
-            Text(
-                modifier = Modifier.align(Alignment.Center),
-                text = title,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
+
         }
     }, navigationIcon = {
         if (onNavigationIconClick != null)

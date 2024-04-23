@@ -12,7 +12,6 @@ import com.example.drchat.data.Chat
      val userName: String? = null,
      val conversationId: String? = null,
 
-
 ) {
      companion object {
          const val COLLECTION_NAME = "Messages"

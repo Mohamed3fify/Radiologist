@@ -4,6 +4,7 @@ import com.example.drchat.logIn.google.UserData
 import com.example.drchat.model.ChatState
 import com.example.drchat.model.AppUser
 import com.example.drchat.model.Conversation
+import com.example.drchat.model.Message
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
@@ -42,6 +43,7 @@ object FirebaseUtils {
         UserData(
             userId = uid,
             userName = displayName,
+            email = email,
             profilePictureUrl = photoUrl?.toString()
         )
     }
@@ -73,11 +75,12 @@ object FirebaseUtils {
     }
 
     fun addMessage(
-        message: ChatState,
+        conversationId: String,
+        message: Message,
         onSuccessListener: OnSuccessListener<Void>,
         onFailureListener: OnFailureListener
     ) {
-        Firebase.firestore.collection(Conversation.COLLECTION_NAME)
+        Firebase.firestore.collection(Message.MESSAGE_COLLECTION)
             .document(message.conversationId!!)
             .collection(ChatState.COLLECTION_NAME)
             .document()
@@ -88,12 +91,12 @@ object FirebaseUtils {
     }
 
     fun getMessages(
-        roomId: String,
+        conversationId: String,
         snapshotListener: EventListener<QuerySnapshot>
     ) {
-        Firebase.firestore.collection(Conversation.COLLECTION_NAME)
-            .document(roomId)
-            .collection(ChatState.COLLECTION_NAME)
+        Firebase.firestore.collection(Message.MESSAGE_COLLECTION)
+            .document(conversationId)
+            .collection(Message.MESSAGE_COLLECTION)
             .addSnapshotListener(snapshotListener)
     }
 

@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,20 +15,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +43,7 @@ import com.example.drchat.chatBot.ChatBotActivity
 import com.example.drchat.logIn.LoginActivity
 import com.example.drchat.ui.theme.DrChatTheme
 import com.example.drchat.ui.theme.Grey
+import com.example.drchat.ui.theme.main_app
 import com.example.drchat.utils.ChatAuthButton
 import com.example.drchat.utils.ChatAuthTextField
 import com.example.drchat.utils.Toolbar
@@ -75,7 +71,6 @@ fun RegisterContent(
     onRegistrationSuccess: () -> Unit,
     onFinish: () -> Unit
 ) {
-    // new
     val accountAlreadyExists by viewModel.accountAlreadyExists.collectAsState()
 
     fun String.getIcon(): ImageVector {
@@ -87,9 +82,9 @@ fun RegisterContent(
         }
     }
 
-
-    Scaffold(topBar = {
-        Toolbar(title = stringResource(id = R.string.register)) {
+    Scaffold(
+        topBar = {
+        Toolbar(title = "") {
             onFinish()
         }
     }) { paddingValues ->
@@ -102,23 +97,32 @@ fun RegisterContent(
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            Spacer(modifier = Modifier.fillMaxHeight(0.10F))
-            Box() {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "App logo",
-                    //contentScale = ContentScale.Crop, // Adjust content scale as needed
-                    modifier = Modifier.size(120.dp)
-
-                )
-            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = null ,
+            modifier =
+            Modifier
+                .size(90.dp)
+                .padding(top = 20.dp)
+        )
 
             Spacer(Modifier.fillMaxHeight(0.10F))
+
+            Text(
+                text = "Create an account ",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(15.dp))
 
                 ChatAuthTextField(
                     state = viewModel.firstNameState,
                     error = viewModel.firstNameErrorState.value,
-                    label = stringResource(R.string.first_name)  to stringResource(R.string.first_name).getIcon() ,
+                    label = stringResource(R.string.userName)  to stringResource(R.string.userName).getIcon() ,
 
                     )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -136,7 +140,6 @@ fun RegisterContent(
                     isPassword = true
                 )
 
-                //new
                 Spacer(modifier = Modifier.height(8.dp))
                 ChatAuthTextField(
                     state = viewModel.confirmPasswordState,
@@ -144,8 +147,6 @@ fun RegisterContent(
                     label = stringResource(id = R.string.confirm_password)  to stringResource(R.string.password).getIcon(),
                     isPassword = true
                 )
-
-
                 Spacer(
                     modifier = Modifier.height(12.dp),
                 )
@@ -156,10 +157,7 @@ fun RegisterContent(
                     viewModel.register()
                 }
 
-
                 Spacer(modifier = Modifier.height(12.dp))
-
-                // new
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 5.dp)
@@ -168,20 +166,16 @@ fun RegisterContent(
                         text = "Already have an account ?",
                         color = Color.White,
                         fontSize = 17.sp
-                        //modifier = Modifier.padding(start = 8.dp)
                     )
-
-                    // Spacer(modifier = Modifier.width(16.dp)) // Add space between text and button
 
                     TextButton(
                         onClick = {
                             viewModel.navigateToLogin()
                         },
-                        // modifier = Modifier.padding(1.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.login),
-                            color = Color.Red,
+                            color = main_app,
                             fontSize = 17.sp,
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold
@@ -189,8 +183,6 @@ fun RegisterContent(
                         )
                     }
                 }
-
-
 
         }
         TriggerEvent(event = viewModel.events.value) {

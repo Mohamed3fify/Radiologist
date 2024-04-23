@@ -73,6 +73,7 @@ class SplashViewModel : ViewModel() {
                 uid = currentUser.userId,
                 email = "",
                 displayName = currentUser.userName,
+                firstName = currentUser.userName
             )
             FirebaseUtils.addUser(appUser,
                 {

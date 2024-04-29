@@ -13,22 +13,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DrChat"
+        android:theme="@style/Theme.Radiologist"
         tools:targetApi="31">
         <activity
-            android:name=".register.RegisterActivity"
+            android:name="com.example.radiologist.register.RegisterActivity"
             android:exported="false"
             android:label="@string/title_activity_register"
-            android:theme="@style/Theme.DrChat" />
+            android:theme="@style/Theme.Radiologist" />
         <activity
-            android:name=".logIn.LoginActivity"
+            android:name="com.example.radiologist.logIn.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_login"
-            android:theme="@style/Theme.DrChat" />
+            android:theme="@style/Theme.Radiologist" />
         <activity
-            android:name=".splach.SplashScreen"
+            android:name="com.example.radiologist.splach.SplashScreen"
             android:exported="true"
-            android:theme="@style/Theme.DrChat" >
+            android:theme="@style/Theme.Radiologist" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,10 +37,10 @@
         </activity>
 
         <activity
-            android:name=".chatBot.ChatBotActivity"
+            android:name="com.example.radiologist.chatBot.ChatBotActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.DrChat">
+            android:theme="@style/Theme.Radiologist">
 
         </activity>
     </application>

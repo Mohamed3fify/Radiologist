@@ -7,7 +7,6 @@ import com.example.radiologist.database.FirebaseUtils
 import com.example.radiologist.database.FirebaseUtils.getGoogleSignInUser
 import com.example.radiologist.model.AppUser
 import com.example.radiologist.model.DataUtils
-import com.example.radiologist.model.DataUtils.firebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase

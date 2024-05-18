@@ -1,15 +1,26 @@
 package com.example.radiologist.data
 
 import android.graphics.Bitmap
+import com.example.radiologist.database.FirebaseUtils
+import com.example.radiologist.model.Conversation
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 object ChatData {
-    private const val api_key = "AIzaSyD9lU9ZrgDw4ZjjtOjkdxs_2fglaXw_MX0"
+    private const val api_key = "AIzaSyBhG66MrA24TQXjRfEyeeOPYKsDvAIo8rI"
 
-    suspend fun getResponse(prompt: String): Chat {
+    var conversationId: Conversation? = null
+    var chatId: Chat? = null
+
+        // val currentTime = System.currentTimeMillis()
+        suspend fun getResponse(
+            prompt: String ,
+            conversationId : String? =null,
+            dateTime: Long? = null
+        ): Chat {
         val generativeModel = GenerativeModel(
             modelName = "gemini-pro", apiKey = api_key
         )
@@ -20,22 +31,32 @@ object ChatData {
             }
 
             return Chat(
+
                 prompt = response.text ?: "error",
                 bitmap = null,
-                isFromUser = false
+                isFromUser = false,
+                conversationId = conversationId ,
+                dateTime = dateTime
             )
 
         } catch (e: Exception) {
             return Chat(
                 prompt = e.message ?: "error",
                 bitmap = null,
-                isFromUser = false
+                isFromUser = false,
+                conversationId = "" ,
+                dateTime = null
             )
         }
 
     }
 
-    suspend fun getResponseWithImage(prompt: String, bitmap: Bitmap): Chat {
+    suspend fun getResponseWithImage(
+        prompt: String,
+        bitmap: Bitmap,
+        conversationId : String? =null,
+        dateTime: Long? = null
+    ): Chat {
         val generativeModel = GenerativeModel(
             modelName = "gemini-pro-vision", apiKey = api_key
         )
@@ -54,14 +75,19 @@ object ChatData {
             return Chat(
                 prompt = response.text ?: "error",
                 bitmap = null,
-                isFromUser = false
+                isFromUser = false,
+                conversationId = conversationId ,
+                dateTime = dateTime
             )
 
         } catch (e: Exception) {
             return Chat(
                 prompt = e.message ?: "error",
                 bitmap = null,
-                isFromUser = false
+                isFromUser = false,
+
+                conversationId = conversationId ,
+                dateTime = null
             )
         }
 

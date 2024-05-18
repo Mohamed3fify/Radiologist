@@ -1,23 +1,18 @@
 package com.example.radiologist.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Conversation(
-var id: String? = null,
-val messages: List<Message> = emptyList(),
-) {
+    var id: String? = null,
+    val userId:String? = null,
+    var name: String = ""
+) : Parcelable
+{
     companion object {
-        const val COLLECTION_NAME = "Rooms"
+        const val COLLECTION_NAME = "Conversation"
     }
-}
 
-data class Message(
-    val conversationId : String? = null,
-    val senderId: String? = null,
-    val content: String? = null,
-    val timestamp: Long = System.currentTimeMillis(),
-
-){
-    companion object {
-        const val MESSAGE_COLLECTION = "Message"
-    }
 }
 

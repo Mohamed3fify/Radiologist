@@ -1,5 +1,6 @@
 package com.example.radiologist.utils
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -40,12 +41,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.radiologist.ui.theme.blue
 import com.example.radiologist.ui.theme.botItem
 import com.example.radiologist.ui.theme.botResponse
 import com.example.radiologist.ui.theme.txt_input_dark
 import com.example.radiologist.ui.theme.txt_input_light
 import com.example.drchat.R
+import com.example.radiologist.chatBot.ChatViewModel
+import com.example.radiologist.model.Conversation
+import com.example.radiologist.ui.theme.bg_light
 import com.example.radiologist.ui.theme.bot_msg_light
 import com.example.radiologist.ui.theme.main_app_light
 import com.example.radiologist.ui.theme.top_bar_dark
@@ -186,6 +191,7 @@ fun ChatInputTextField(
     onTextChanged: (String) -> Unit,
     onImagePickerClicked: () -> Unit,
     onSendClicked: () -> Unit,
+
 ) {
     Surface(
         shape = RoundedCornerShape(40.dp),
@@ -208,7 +214,7 @@ fun ChatInputTextField(
                     fontSize = 18.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    cursorColor = Color.White,
+                    cursorColor = if(isSystemInDarkTheme()) Color.White else Color.Black,
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                 ),
@@ -245,6 +251,7 @@ fun ChatInputTextField(
                     contentDescription = "Send",
                     tint = if (isSystemInDarkTheme()) Color.White else Color.Black
                 )
+
             }
         }
     }
@@ -257,6 +264,7 @@ fun ChatInputTextField(
         text = "",
         onTextChanged = {},
         onImagePickerClicked = { },
+
 
     ) {}
     ChatInputTextField(text = "", onTextChanged = {}, onImagePickerClicked = {  }) {

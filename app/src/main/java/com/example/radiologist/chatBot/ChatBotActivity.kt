@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -30,6 +31,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HistoryToggleOff
+import androidx.compose.material.icons.outlined.HistoryToggleOff
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -38,8 +42,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,8 +68,8 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.drchat.R
-
 import com.example.radiologist.database.FirebaseUtils
+import com.example.radiologist.history.HistoryActivity
 import com.example.radiologist.logIn.LoginActivity
 import com.example.radiologist.logIn.google.GoogleAuthUiClient
 import com.example.radiologist.ui.theme.DrChatTheme
@@ -71,12 +77,9 @@ import com.example.radiologist.ui.theme.Grey
 import com.example.radiologist.ui.theme.bg_dark
 import com.example.radiologist.ui.theme.bg_light
 import com.example.radiologist.ui.theme.bot_msg_light
-import com.example.radiologist.ui.theme.main_app
 import com.example.radiologist.ui.theme.main_app_light
-import com.example.radiologist.ui.theme.top_bar_dark
 import com.example.radiologist.ui.theme.txt
 import com.example.radiologist.ui.theme.txt_input_dark
-import com.example.radiologist.ui.theme.txt_input_light
 import com.example.radiologist.ui.theme.user_txt_dark
 import com.example.radiologist.utils.BotTypingIndicator
 import com.example.radiologist.utils.ChatInputTextField
@@ -85,6 +88,8 @@ import com.example.radiologist.utils.DividerrItem
 import com.example.radiologist.utils.DrawerBody
 import com.example.radiologist.utils.DrawerBottom
 import com.example.radiologist.utils.DrawerHeader
+import com.example.radiologist.utils.HistoryNavigation
+import com.example.radiologist.utils.NavigationItem
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -113,20 +118,48 @@ class ChatBotActivity : ComponentActivity() {
         setContent {
             DrChatTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize().background(Color.Transparent),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Transparent),
                     color = Grey,
                 ) {
-
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
                     val context = LocalContext.current
+                    val darkTheme = remember { mutableStateOf(false) }
+
                     ModalNavigationDrawer(
                         drawerContent = {
                             ModalDrawerSheet {
                                 FirebaseUtils.getGoogleSignInUser()
-                                    ?.let { DrawerHeader(userData = it) }
+                                    ?.let { DrawerHeader(
+                                        userData = it ,
+                                        darkTheme = darkTheme,
+                                        onThemeToggle = { darkTheme.value = !darkTheme.value }
+                                    ) }
                                 DividerrItem()
-                                DrawerBody()
+                                DrawerBody(
+                                    onChatClicked = {
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    },
+                                    onNewChatClicked = {
+                                        scope.launch {
+                                            drawerState.close()
+                                        }
+                                    },
+
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                HistoryNavigation(
+                                    text = {
+                                        lifecycleScope.launch {
+                                            val intent = Intent(context, HistoryActivity::class.java)
+                                            context.startActivity(intent)
+                                        }
+                                    }
+                                )
                                 DividerrItem()
                                 FirebaseUtils.getGoogleSignInUser()
                                     ?.let {
@@ -157,8 +190,8 @@ class ChatBotActivity : ComponentActivity() {
                         Scaffold(topBar = {
                             Column {
                                 ChatToolBar(
-                                    onNavigationIconClick = { scope.launch { drawerState.open() } }
-                                ) {}
+                                    onNavigationIconClick = { scope.launch { drawerState.open() } },
+                                )
                                 DividerrItem()
                             }
                         })
@@ -172,15 +205,13 @@ class ChatBotActivity : ComponentActivity() {
     }
 
     @Composable
-    fun chatScreen(paddingValues: PaddingValues) {
+    fun chatScreen(paddingValues: PaddingValues ) {
         val chatViewModel = viewModel<ChatViewModel>()
         val chatState = chatViewModel.chatState.collectAsState().value
         val bitmap = getBitmap()
-      //  val clickedImage by chatViewModel.clickedImage.collectAsState() // Observe clickedImage state
-
-        //displayClickedImage(clickedImage)
 
         val isSystemInDarkTheme = isSystemInDarkTheme()
+
 
         Column(
             modifier =
@@ -190,7 +221,6 @@ class ChatBotActivity : ComponentActivity() {
                 .padding(top = paddingValues.calculateTopPadding()),
             verticalArrangement = Arrangement.Bottom,
         ) {
-            //displayClickedImage(chatViewModel.clickedImage.value)
 
             LazyColumn(
                 modifier =
@@ -256,6 +286,7 @@ class ChatBotActivity : ComponentActivity() {
                         )
                     },
                     onImagePickerClicked = {
+
                         imagePicker.launch(
                             PickVisualMediaRequest
                                 .Builder()
@@ -264,11 +295,22 @@ class ChatBotActivity : ComponentActivity() {
                         )
                     },
                     onSendClicked = {
-                        chatViewModel.onEvent(ChatUiEvent.SendPrompt(chatState.prompt, bitmap))
+                        val currentTime = System.currentTimeMillis()
+                        val conversationId = chatState.chatList.firstOrNull { !it.isFromUser }?.conversationId ?: ""
+
+                        chatViewModel.onEvent(
+                            ChatUiEvent.SendPrompt(
+                                chatState.prompt,
+                                bitmap,
+                                conversationId,
+                                currentTime
+                            )
+                        )
+
                         uriState.update { "" }
+
                     }
                 )
-                //Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
@@ -354,7 +396,6 @@ class ChatBotActivity : ComponentActivity() {
                     .padding(10.dp)
 
                     .background(Color.Transparent),
-                //  contentScale = ContentScale.Crop
             )
 
             SelectionContainer {
@@ -415,7 +456,9 @@ class ChatBotActivity : ComponentActivity() {
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun ChatPreview() {
+  DrChatTheme {
 
+  }
 }
 
 

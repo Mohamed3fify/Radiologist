@@ -71,13 +71,13 @@ private fun AppDrawerIn(
         DrawerHeader(clickAction = onIconClicked)
         DividerItem()
         DrawerItemHeader("Chats")
-        ChatItem("New Chat", Icons.Outlined.AddComment, false) {
+        ConversationItem("New Chat", Icons.Outlined.AddComment, false) {
             onNewChatClicked()
         }
 
         DividerItem(modifier = Modifier.padding(horizontal = 28.dp))
         DrawerItemHeader("Settings")
-        ChatItem("Settings", Icons.Filled.Settings, false) { onChatClicked("Settings") }
+        ConversationItem("Settings", Icons.Filled.Settings, false) { onChatClicked("Settings") }
     }
 }
 
@@ -130,7 +130,7 @@ private fun DrawerItemHeader(text: String) {
 }
 
 @Composable
-private fun ChatItem(
+private fun ConversationItem(
     text: String,
     icon: ImageVector = Icons.Filled.Edit,
     selected: Boolean,
@@ -180,7 +180,7 @@ private fun ChatItem(
 }
 
 @Composable
-private fun RecycleChatItem(
+private fun RecycleConversationItem(
     text: String,
     icon: ImageVector = Icons.Filled.Edit,
     selected: Boolean,

@@ -16,6 +16,11 @@
         android:theme="@style/Theme.Radiologist"
         tools:targetApi="31">
         <activity
+            android:name="com.example.radiologist.history.HistoryActivity"
+            android:exported="false"
+            android:label="@string/title_activity_history"
+            android:theme="@style/Theme.Radiologist" />
+        <activity
             android:name="com.example.radiologist.register.RegisterActivity"
             android:exported="false"
             android:label="@string/title_activity_register"
@@ -28,21 +33,18 @@
         <activity
             android:name="com.example.radiologist.splach.SplashScreen"
             android:exported="true"
-            android:theme="@style/Theme.Radiologist" >
+            android:theme="@style/Theme.Radiologist">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="com.example.radiologist.chatBot.ChatBotActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Radiologist">
-
-        </activity>
+            android:theme="@style/Theme.Radiologist"></activity>
     </application>
 
 </manifest>

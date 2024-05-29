@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -14,6 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,13 +28,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HistoryToggleOff
-import androidx.compose.material.icons.outlined.HistoryToggleOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -44,15 +44,19 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -60,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,6 +77,7 @@ import com.example.radiologist.database.FirebaseUtils
 import com.example.radiologist.history.HistoryActivity
 import com.example.radiologist.logIn.LoginActivity
 import com.example.radiologist.logIn.google.GoogleAuthUiClient
+import com.example.radiologist.model.Constants
 import com.example.radiologist.ui.theme.DrChatTheme
 import com.example.radiologist.ui.theme.Grey
 import com.example.radiologist.ui.theme.bg_dark
@@ -89,11 +95,11 @@ import com.example.radiologist.utils.DrawerBody
 import com.example.radiologist.utils.DrawerBottom
 import com.example.radiologist.utils.DrawerHeader
 import com.example.radiologist.utils.HistoryNavigation
-import com.example.radiologist.utils.NavigationItem
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 
 class ChatBotActivity : ComponentActivity() {
     private val uriState = MutableStateFlow("")
@@ -108,7 +114,6 @@ class ChatBotActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val googleAuthUiClient by lazy {
             GoogleAuthUiClient(
                 context = applicationContext,
@@ -116,13 +121,16 @@ class ChatBotActivity : ComponentActivity() {
             )
         }
         setContent {
+            val chatViewModel = viewModel<ChatViewModel>()
             DrChatTheme {
+
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Transparent),
                     color = Grey,
                 ) {
+
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
                     val context = LocalContext.current
@@ -132,33 +140,33 @@ class ChatBotActivity : ComponentActivity() {
                         drawerContent = {
                             ModalDrawerSheet {
                                 FirebaseUtils.getGoogleSignInUser()
-                                    ?.let { DrawerHeader(
-                                        userData = it ,
-                                        darkTheme = darkTheme,
-                                        onThemeToggle = { darkTheme.value = !darkTheme.value }
-                                    ) }
+                                    ?.let {
+                                        DrawerHeader(
+                                            userData = it,
+                                            darkTheme = darkTheme,
+                                            onThemeToggle = {
+                                                darkTheme.value = !darkTheme.value
+                                            }
+                                        )
+                                    }
                                 DividerrItem()
-                                DrawerBody(
-                                    onChatClicked = {
-                                        scope.launch {
-                                            drawerState.close()
-                                        }
-                                    },
-                                    onNewChatClicked = {
-                                        scope.launch {
-                                            drawerState.close()
-                                        }
-                                    },
-
-                                )
+                                DrawerBody({}, {})
                                 Spacer(modifier = Modifier.height(10.dp))
                                 HistoryNavigation(
                                     text = {
                                         lifecycleScope.launch {
-                                            val intent = Intent(context, HistoryActivity::class.java)
+                                            val intent =
+                                                Intent(context, HistoryActivity::class.java)
                                             context.startActivity(intent)
+
+                                        }
+                                        if (drawerState.isOpen) {
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
                                         }
                                     }
+
                                 )
                                 DividerrItem()
                                 FirebaseUtils.getGoogleSignInUser()
@@ -173,11 +181,14 @@ class ChatBotActivity : ComponentActivity() {
                                                         Toast.LENGTH_LONG
                                                     ).show()
                                                     val intent =
-                                                        Intent(context, LoginActivity::class.java)
-                                                  intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                                                   context.startActivity(intent)
+                                                        Intent(
+                                                            context,
+                                                            LoginActivity::class.java
+                                                        )
+                                                    intent.flags =
+                                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                                    context.startActivity(intent)
                                                     (context as Activity).finishAffinity()
-
                                                 }
                                             }
                                         )
@@ -191,6 +202,7 @@ class ChatBotActivity : ComponentActivity() {
                             Column {
                                 ChatToolBar(
                                     onNavigationIconClick = { scope.launch { drawerState.open() } },
+                                    onResetChatScreen = { chatViewModel.onEvent(ChatUiEvent.ResetChatScreen) }
                                 )
                                 DividerrItem()
                             }
@@ -205,13 +217,24 @@ class ChatBotActivity : ComponentActivity() {
     }
 
     @Composable
-    fun chatScreen(paddingValues: PaddingValues ) {
+    fun chatScreen(paddingValues: PaddingValues) {
         val chatViewModel = viewModel<ChatViewModel>()
         val chatState = chatViewModel.chatState.collectAsState().value
-        val bitmap = getBitmap()
+        val conversationId = intent.getStringExtra(Constants.CONVERSATION_KEY)
 
+        val bitmap = getBitmap()
         val isSystemInDarkTheme = isSystemInDarkTheme()
 
+        var showImageDialog by remember { mutableStateOf(false) }
+        var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+        if (showImageDialog) {
+            showImage(selectedBitmap) { showImageDialog = false }
+        }
+        if (conversationId != null) {
+            LaunchedEffect(conversationId) {
+                chatViewModel.onEvent(ChatUiEvent.LoadConversation(conversationId))
+            }
+        }
 
         Column(
             modifier =
@@ -221,27 +244,41 @@ class ChatBotActivity : ComponentActivity() {
                 .padding(top = paddingValues.calculateTopPadding()),
             verticalArrangement = Arrangement.Bottom,
         ) {
+            if (chatState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(if (isSystemInDarkTheme) bg_dark else bg_light),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    reverseLayout = true,
+                ) {
+                    itemsIndexed(chatState.chatList) { index, chat ->
+                        if (chat.isFromUser) {
 
-            LazyColumn(
-                modifier =
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                reverseLayout = true,
-            ) {
-                itemsIndexed(chatState.chatList) { index, chat ->
-                    if (chat.isFromUser) {
+                            userItem(
+                                prompt = chat.prompt,
+                                bitmap = chat.bitmap,
+                                onImageClick = { bitmap ->
+                                    showImageDialog = true
+                                    selectedBitmap = bitmap
+                                }
+                            )
+                        } else {
+                            botItem(
+                                response = chat.prompt,
+                            )
+                        }
 
-                        userItem(
-                            prompt = chat.prompt,
-                            bitmap = chat.bitmap,
-                            onImageClick ={ }
-                        )
-                    } else {
-                        botItem(
-                            response = chat.prompt
-                        )
                     }
                 }
             }
@@ -296,19 +333,18 @@ class ChatBotActivity : ComponentActivity() {
                     },
                     onSendClicked = {
                         val currentTime = System.currentTimeMillis()
-                        val conversationId = chatState.chatList.firstOrNull { !it.isFromUser }?.conversationId ?: ""
+                        val currentConversationId =
+                            chatState.chatList.firstOrNull { !it.isFromUser }?.conversationId ?: ""
 
                         chatViewModel.onEvent(
                             ChatUiEvent.SendPrompt(
                                 chatState.prompt,
                                 bitmap,
-                                conversationId,
+                                currentConversationId,
                                 currentTime
                             )
                         )
-
                         uriState.update { "" }
-
                     }
                 )
             }
@@ -335,7 +371,7 @@ class ChatBotActivity : ComponentActivity() {
                     shape = RoundedCornerShape(12.dp)
                 )
                 .clip(shape = RoundedCornerShape(12.dp))
-            ) {
+        ) {
 
             bitmap?.let {
                 Box(
@@ -357,7 +393,7 @@ class ChatBotActivity : ComponentActivity() {
                         contentScale = ContentScale.Crop,
                         bitmap = it.asImageBitmap(),
 
-                    )
+                        )
                 }
             }
 
@@ -374,16 +410,17 @@ class ChatBotActivity : ComponentActivity() {
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     overflow = TextOverflow.Ellipsis
                 )
+
             }
+
 
         }
     }
 
     @Composable
     fun botItem(response: String) {
-        val profileImage = painterResource(if (isSystemInDarkTheme()) R.drawable.logo_radiologist_dark else R.drawable.logo_radiologist_light)
-
-
+        val profileImage =
+            painterResource(if (isSystemInDarkTheme()) R.drawable.logo_radiologist_dark else R.drawable.logo_radiologist_light)
         Column(
             modifier = Modifier.padding(end = 100.dp, bottom = 16.dp),
         ) {
@@ -412,7 +449,6 @@ class ChatBotActivity : ComponentActivity() {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
         }
     }
 
@@ -435,30 +471,53 @@ class ChatBotActivity : ComponentActivity() {
 
         return null
     }
-    @Composable
-    fun displayClickedImage(bitmap: Bitmap?) {
-        if (bitmap != null) {
-            Image(
+}
+
+ @Composable
+ fun showImage(bitmap: Bitmap?, onDismiss: () -> Unit) {
+    if (bitmap != null) {
+
+        var scale by remember { mutableStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+        var rotation by remember { mutableStateOf(0f) }
+
+        Dialog(onDismissRequest = onDismiss) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentDescription = "clicked image",
-                contentScale = ContentScale.Crop,
-                bitmap = bitmap.asImageBitmap(),
-            )
+                    .wrapContentSize(Alignment.Center, unbounded = true)
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+                    scale *= zoomChange
+                    offset += offsetChange
+                    rotation += rotationChange
+                }
+
+                Image(
+                    modifier = Modifier
+                        .transformable(state = state)
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            rotationZ = rotation,
+                            translationX = offset.x,
+                            translationY = offset.y
+                        ),
+                    contentDescription = "full-size image",
+                    contentScale = ContentScale.Crop,
+                    bitmap = bitmap.asImageBitmap(),
+                )
+            }
         }
     }
 }
 
-
-
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun ChatPreview() {
-  DrChatTheme {
+    DrChatTheme {
 
-  }
+    }
 }
 
 

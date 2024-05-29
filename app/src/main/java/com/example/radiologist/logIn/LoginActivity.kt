@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -262,7 +263,8 @@ fun loginContent(
                         viewModel.resetLoginSuccesss()
                         onFinish()
                         showLoginSuccessDialog = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Blue)
                 ) {
                     Text("OK")
                 }
@@ -292,7 +294,8 @@ fun TriggerEvents(
                     Button(
                         onClick = {
                             viewModel.navigateToRegister()
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
                     ) {
                         Text("Create Account")
                     }
@@ -302,7 +305,11 @@ fun TriggerEvents(
                         onClick = {
                             viewModel.resetEvent()
                             onFinish()
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            Color.Black,
+                            contentColor = Color.White
+                        )
                     ) {
                         Text("Try again ")
                     }

@@ -16,6 +16,7 @@
 
     <string name="google_client_id">629129754377-5qvsk5nea3n6j9k30u0tbta521foce9d.apps.googleusercontent.com</string>
     <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_chat_history">ChatHistoryActivity</string>
 
 
 </resources>

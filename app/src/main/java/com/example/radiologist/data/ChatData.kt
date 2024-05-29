@@ -1,21 +1,18 @@
 package com.example.radiologist.data
 
 import android.graphics.Bitmap
-import com.example.radiologist.database.FirebaseUtils
+import com.example.radiologist.model.Chat
 import com.example.radiologist.model.Conversation
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.UUID
 
 object ChatData {
     private const val api_key = "AIzaSyBhG66MrA24TQXjRfEyeeOPYKsDvAIo8rI"
 
     var conversationId: Conversation? = null
-    var chatId: Chat? = null
 
-        // val currentTime = System.currentTimeMillis()
         suspend fun getResponse(
             prompt: String ,
             conversationId : String? =null,
@@ -36,7 +33,7 @@ object ChatData {
                 bitmap = null,
                 isFromUser = false,
                 conversationId = conversationId ,
-                dateTime = dateTime
+                dateTime = dateTime,
             )
 
         } catch (e: Exception) {
@@ -45,7 +42,7 @@ object ChatData {
                 bitmap = null,
                 isFromUser = false,
                 conversationId = "" ,
-                dateTime = null
+                dateTime = null,
             )
         }
 
@@ -77,7 +74,7 @@ object ChatData {
                 bitmap = null,
                 isFromUser = false,
                 conversationId = conversationId ,
-                dateTime = dateTime
+                dateTime = dateTime,
             )
 
         } catch (e: Exception) {
@@ -85,9 +82,8 @@ object ChatData {
                 prompt = e.message ?: "error",
                 bitmap = null,
                 isFromUser = false,
-
                 conversationId = conversationId ,
-                dateTime = null
+                dateTime = null,
             )
         }
 

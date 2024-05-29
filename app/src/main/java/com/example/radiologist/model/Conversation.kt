@@ -7,7 +7,8 @@ import kotlinx.parcelize.Parcelize
 data class Conversation(
     var id: String? = null,
     val userId:String? = null,
-    var name: String = ""
+    var name: String = "",
+    var dateTime: Long? = null,
 ) : Parcelable
 {
     companion object {

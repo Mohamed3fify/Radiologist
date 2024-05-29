@@ -1,26 +1,19 @@
 package com.example.radiologist.utils
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HistoryToggleOff
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.outlined.AddComment
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,8 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,26 +30,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.drchat.R
 import com.example.radiologist.logIn.google.UserData
-import com.example.radiologist.model.Conversation
 import com.example.radiologist.model.DataUtils.appUser
-import kotlinx.coroutines.launch
-data class NavigationItem(
-    val title: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
-    val color: Color?= null
-)
-
-
 @Composable
-fun DrawerHeader(userData: UserData, darkTheme: MutableState<Boolean>, onThemeToggle: () -> Unit ) {
+fun DrawerHeader(
+    userData: UserData,
+    darkTheme: MutableState<Boolean>,
+    onThemeToggle: () -> Unit
+) {
     Column (
          modifier = Modifier
              .fillMaxWidth()
@@ -138,172 +122,10 @@ fun DrawerHeader(userData: UserData, darkTheme: MutableState<Boolean>, onThemeTo
 }
 
 @Composable
-private fun ColumnScope.HistoryConversations(
-    onChatClicked: (String) -> Unit,
-    deleteConversation: (String) -> Unit,
-    onConversation: (Conversation) -> Unit,
-
-    currentConversationState: String,
-    conversationState: List<Conversation>
-) {
-    val scope = rememberCoroutineScope()
-
-    LazyColumn(
-        Modifier
-            .fillMaxWidth()
-            .weight(1f, false),
-    ) {
-        items(conversationState.size) { index ->
-            RecycleConversationItem(
-                text = conversationState[index].name,
-                Icons.AutoMirrored.Filled.Message,
-                selected = conversationState[index].id == currentConversationState,
-                onChatClicked = {
-                    onChatClicked("")
-                    onConversation(conversationState[index])
-                    scope.launch {
-                        onConversation(conversationState[index])
-                    }
-                },
-                onDeleteClicked = {
-                    scope.launch {
-                        deleteConversation("")
-
-                    }
-                }
-            )
-        }
-    }
-}
-@Composable
-private fun ConversationItem(
-    text: String ,
-    icon: ImageVector = Icons.Filled.Edit,
-    selected: Boolean ,
-    onChatClicked: () -> Unit
-) {
-    val background = if (selected) {
-        Modifier.background(MaterialTheme.colorScheme.primaryContainer)
-    } else {
-        Modifier
-    }
-    Row(
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .clip(CircleShape)
-            .then(background)
-            .clickable(onClick = onChatClicked),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val iconTint = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-        Icon(
-            icon,
-            tint = iconTint,
-            modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                .size(25.dp),
-            contentDescription = null,
-        )
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.padding(start = 12.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-private fun RecycleConversationItem(
-    text: String,
-    icon: ImageVector = Icons.Filled.Edit,
-    selected: Boolean,
-    onChatClicked: () -> Unit,
-    onDeleteClicked: () -> Unit
-) {
-    val background = if (selected) {
-        Modifier.background(MaterialTheme.colorScheme.primaryContainer)
-    } else {
-        Modifier
-    }
-    Row(
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth()
-            .padding(horizontal = 34.dp)
-            .clip(CircleShape)
-            .then(background)
-            .clickable(onClick = onChatClicked),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val iconTint = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-        Icon(
-            icon,
-            tint = iconTint,
-            modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                .size(25.dp),
-            contentDescription = null,
-        )
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .fillMaxWidth(0.85f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.weight(0.9f, true))
-        Icon(
-            imageVector = Icons.Filled.Delete,
-            contentDescription = "Delete",
-            tint = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.clickable { onDeleteClicked() }
-        )
-    }
-}
-@Composable
 fun DrawerBody(
     onChatClicked: (String) -> Unit,
     onNewChatClicked: () -> Unit,
-) {
-    Column {
-        DividerItem()
-        ConversationItem("New Chat", Icons.Outlined.AddComment, false) {
-            onNewChatClicked()
-
-        }
-
-
-    }
-
-}
+) { Column {} }
 
 @Composable
 fun DrawerBottom(onSignOut: () ->Unit) {
@@ -333,9 +155,8 @@ fun DrawerBottom(onSignOut: () ->Unit) {
     }
 }
 
-
-    @Composable
-    fun DividerrItem(modifier: Modifier = Modifier) {
+@Composable
+fun DividerrItem(modifier: Modifier = Modifier) {
         Divider(
             modifier = modifier,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -351,9 +172,9 @@ fun HistoryNavigation(
 ) {
     Row(
         modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 12.dp)
-        .clip(CircleShape)
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .clip(CircleShape)
     ){
             Icon(
                 imageVector = Icons.Filled.HistoryToggleOff,

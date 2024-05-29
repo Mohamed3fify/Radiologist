@@ -1,16 +1,29 @@
 package com.example.radiologist.utils
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -36,10 +49,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.radiologist.ui.theme.blue
@@ -54,6 +70,7 @@ import com.example.radiologist.ui.theme.bg_light
 import com.example.radiologist.ui.theme.bot_msg_light
 import com.example.radiologist.ui.theme.main_app_light
 import com.example.radiologist.ui.theme.top_bar_dark
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -170,15 +187,17 @@ fun BotTypingIndicator() {
                 modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularProgressIndicator(
+                /*CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = if (isSystemInDarkTheme()) Color.White else Color.White
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))*/
                 Text(
-                    text = "Typing...",
+                    text = "Typing",
                     color =  if (isSystemInDarkTheme()) Color.White else Color.White
                 )
+                Spacer(modifier = Modifier.width(3.dp))
+                TypingIndicator(modifier = Modifier.size(20.dp))
             }
         }
     }
@@ -256,6 +275,73 @@ fun ChatInputTextField(
         }
     }
 }
+
+@Composable
+fun TypingIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = Color.White,
+    dotSize: Dp = 4.dp,
+    dotSpacing: Dp = 2.dp,
+    animationDuration: Int = 250
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+
+    val dot1Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(animationDuration, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val dot2Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(animationDuration, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+            initialStartOffset = StartOffset(200)
+        ), label = ""
+    )
+
+    val dot3Offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(animationDuration, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+            initialStartOffset = StartOffset(400)
+        ), label = ""
+    )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(dotSize)
+                .offset { IntOffset(0, dot1Offset.toInt()) }
+                .background(color, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(dotSpacing))
+        Box(
+            modifier = Modifier
+                .size(dotSize)
+                .offset { IntOffset(0, dot2Offset.toInt()) }
+                .background(color, shape = CircleShape)
+        )
+        Spacer(modifier = Modifier.width(dotSpacing))
+        Box(
+            modifier = Modifier
+                .size(dotSize)
+                .offset { IntOffset(0, dot3Offset.toInt()) }
+                .background(color, shape = CircleShape)
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable

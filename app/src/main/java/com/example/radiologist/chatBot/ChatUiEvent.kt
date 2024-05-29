@@ -11,7 +11,10 @@ sealed class ChatUiEvent {
         val conversationId : String? =null,
         val dateTime : Long,
 
-    ) : ChatUiEvent()
+        ) : ChatUiEvent()
     data object BotTyping : ChatUiEvent()
-    data class ImageClicked(val bitmap: Bitmap) : ChatUiEvent()
+
+    data object ResetChatScreen : ChatUiEvent()
+    data class LoadConversation(val conversationId: String) : ChatUiEvent()
+
 }

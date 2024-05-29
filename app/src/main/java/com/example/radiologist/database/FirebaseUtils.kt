@@ -3,7 +3,7 @@ package com.example.radiologist.database
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.example.radiologist.data.Chat
+import com.example.radiologist.model.Chat
 import com.example.radiologist.logIn.google.UserData
 import com.example.radiologist.model.AppUser
 import com.example.radiologist.model.Constants
@@ -12,17 +12,19 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.Date
 import java.util.UUID
-
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 object FirebaseUtils {
     private val auth = Firebase.auth
@@ -84,15 +86,61 @@ object FirebaseUtils {
         Firebase.firestore
             .collection(Conversation.COLLECTION_NAME)
             .whereEqualTo(Constants.USER_ID, userId)
+            //.orderBy("dateTime", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
     }
 
-    fun saveChatMessage(
-        chat: Chat,
-        conversationId: String
+    fun deleteConversation(
+        conversationId: String,
+        onSuccessListener: OnSuccessListener<Void>,
+        onFailureListener: OnFailureListener
     ) {
+        val conversationRef = Firebase.firestore
+            .collection(Conversation.COLLECTION_NAME)
+            .document(conversationId)
+
+        conversationRef.collection(Chat.COLLECTION_NAME)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val batch = Firebase.firestore.batch()
+
+                    for (document in task.result) {
+                        val chatRef = conversationRef.collection(Chat.COLLECTION_NAME).document(document.id)
+                        val bitmapUri = document.getString("bitmapUri")
+                        if (bitmapUri != null) {
+                            val storageRef = Firebase.storage.getReferenceFromUrl(bitmapUri)
+                            storageRef.delete()
+                                .addOnFailureListener { e ->
+                                    Log.e("FirebaseUtils", "Error deleting image: ${e.message}")
+                                }
+                        }
+
+                        batch.delete(chatRef)
+                    }
+                    batch.commit()
+                        .addOnCompleteListener { batchTask ->
+                            if (batchTask.isSuccessful) {
+                                conversationRef.delete()
+                                    .addOnSuccessListener(onSuccessListener)
+                                    .addOnFailureListener(onFailureListener)
+                            } else {
+                                onFailureListener.onFailure(batchTask.exception!!)
+                            }
+                        }
+                } else {
+                    onFailureListener.onFailure(task.exception!!)
+                }
+            }
+    }
+
+
+fun saveChatMessage(
+    chat: Chat,
+    conversationId: String
+) {
         val documentReference = Firebase.firestore
             .collection(Conversation.COLLECTION_NAME)
             .document(conversationId)
@@ -106,7 +154,7 @@ object FirebaseUtils {
             val storageRef = Firebase.storage.reference
             val imageRef = storageRef.child("images/${UUID.randomUUID()}.png")
             val stream = ByteArrayOutputStream()
-            chat.bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            chat.bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val uploadTask = imageRef.putBytes(stream.toByteArray())
 
             uploadTask.continueWithTask { task ->
@@ -125,7 +173,8 @@ object FirebaseUtils {
                         "bitmapUri" to downloadUri.toString(),
                         "isFromUser" to chat.isFromUser,
                         "conversationId" to chat.conversationId,
-                        "dateTime" to chat.dateTime
+                        "dateTime" to chat.dateTime,
+
                     )
 
                     documentReference
@@ -147,7 +196,7 @@ object FirebaseUtils {
                 "bitmapUri" to null,
                 "isFromUser" to chat.isFromUser,
                 "conversationId" to chat.conversationId,
-                "dateTime" to chat.dateTime
+                "dateTime" to chat.dateTime,
             )
             documentReference
                 .set(chatData)
@@ -160,28 +209,77 @@ object FirebaseUtils {
         }
     }
 
-    fun fetchChatMessages(
-        conversationId: String,
-        callback: (List<Chat>) -> Unit
-    ) {
-        val firestore = Firebase.firestore
-        val chatCollectionRef = firestore.collection(Conversation.COLLECTION_NAME)
+ private fun getChatMessages(
+    conversationId: String,
+    onComplete: (List<Chat>) -> Unit
+ ) {
+        val chatList = mutableListOf<Chat>()
+        val documentReference = Firebase.firestore
+            .collection(Conversation.COLLECTION_NAME)
             .document(conversationId)
             .collection(Chat.COLLECTION_NAME)
+            .orderBy("dateTime", Query.Direction.DESCENDING)
 
-        chatCollectionRef.orderBy("dateTime").get()
+        documentReference.get()
             .addOnSuccessListener { documents ->
-                val chatList = mutableListOf<Chat>()
                 for (document in documents) {
                     val chat = document.toObject(Chat::class.java)
+
+                    if (document.contains("isFromUser")) {
+                        chat.isFromUser = document.getBoolean("isFromUser") ?: false
+                    }
+
                     chatList.add(chat)
                 }
-                callback(chatList)
+                onComplete(chatList)
             }
-            .addOnFailureListener { exception ->
-                Log.e("FirebaseUtils", "Error getting documents: ", exception)
+            .addOnFailureListener { e ->
+                Log.e("FirebaseUtils", "Error retrieving messages: ${e.message}")
             }
     }
 
+ private fun downloadImage(
+     uri: String,
+     onComplete: (Bitmap?) -> Unit
+ ) {
+        val storageRef = Firebase.storage.getReferenceFromUrl(uri)
+
+        storageRef.getBytes(Long.MAX_VALUE).addOnSuccessListener { bytes ->
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            onComplete(bitmap)
+        }.addOnFailureListener { e ->
+            Log.e("FirebaseUtils", "Error downloading image: ${e.message}")
+            onComplete(null)
+        }
+    }
+@OptIn(DelicateCoroutinesApi::class)
+fun fetchChatMessagesWithImages(
+   conversationId: String,
+   onComplete: (List<Chat>) -> Unit
+) {
+        getChatMessages(conversationId) { chatList ->
+            val downloadJobs = chatList.map { chat ->
+                if (chat.bitmapUri != null) {
+                    val uri = chat.bitmapUri!!
+                    CompletableDeferred<Bitmap?>().apply {
+                        downloadImage(uri) { bitmap ->
+                            chat.bitmap = bitmap
+                            complete(bitmap)
+                        }
+                    }
+                } else {
+                    CompletableDeferred<Bitmap?>().apply {
+                        complete(null)
+                    }
+                }
+            }
+            GlobalScope.launch {
+                downloadJobs.awaitAll()
+                onComplete(chatList)
+            }
+        }
+    }
 }
+
+
 

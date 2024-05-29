@@ -4,20 +4,19 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.radiologist.model.EventBas
+import com.example.radiologist.model.SharedInterface
 import com.example.radiologist.database.FirebaseUtils
 import com.example.radiologist.model.Conversation
-import com.example.radiologist.register.RegisterEvent
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import java.util.UUID
+import kotlinx.coroutines.launch
 
 class HistoryViewModel : ViewModel() {
-    private val isLoading = mutableStateOf(false)
     val event = mutableStateOf<HistoryEvent>(HistoryEvent.Idle)
     val conversationsList = mutableStateListOf<Conversation>()
-    val conversationId = UUID.randomUUID().toString()
     val events = mutableStateOf<HistoryEvent>(HistoryEvent.Idle)
-
 
     init {
         getConversationsFromFirestore()
@@ -26,7 +25,6 @@ class HistoryViewModel : ViewModel() {
 
     fun getConversationsFromFirestore() {
         val userId = Firebase.auth.currentUser?.uid ?: return
-        isLoading.value = true
         FirebaseUtils.getConversation(
             userId = userId,
             onSuccessListener = {
@@ -35,14 +33,25 @@ class HistoryViewModel : ViewModel() {
             conversationsList.addAll(list)
         }, onFailureListener = {
             Log.e("TAG", "getConversationsFromFirestore: ${it.message}")
-        }
+         }
         )
     }
-    fun navigateToChatScreen(conversation: Conversation) {
-        event.value = HistoryEvent.NavigateToChatScreen(conversation)
-    }
 
+    fun deleteConversation(conversationId: String) {
+        FirebaseUtils.deleteConversation(
+            conversationId,
+            onSuccessListener = {
+                viewModelScope.launch {
+                    EventBas.postEvent(SharedInterface.DeleteCurrentConversation(conversationId))
+                    getConversationsFromFirestore()
+                }
+            }, onFailureListener = {
+                Log.e("TAG", "deleteConversation: ${it.message}")
+            }
+        )
+    }
     fun resetEventState() {
         event.value = HistoryEvent.Idle
     }
+
 }

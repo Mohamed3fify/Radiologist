@@ -30,7 +30,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -260,11 +259,10 @@ fun loginContent(
                 Button(
                     onClick = {
                         viewModel.resetEvent()
-                        viewModel.resetLoginSuccesss()
+                        viewModel.resetLoginSuccess()
                         onFinish()
                         showLoginSuccessDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(Color.Blue)
                 ) {
                     Text("OK")
                 }
@@ -295,7 +293,6 @@ fun TriggerEvents(
                         onClick = {
                             viewModel.navigateToRegister()
                         },
-                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
                     ) {
                         Text("Create Account")
                     }

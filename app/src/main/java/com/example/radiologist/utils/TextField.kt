@@ -1,19 +1,15 @@
 package com.example.radiologist.utils
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.StartOffset
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -39,38 +34,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.radiologist.ui.theme.blue
-import com.example.radiologist.ui.theme.botItem
-import com.example.radiologist.ui.theme.botResponse
-import com.example.radiologist.ui.theme.txt_input_dark
-import com.example.radiologist.ui.theme.txt_input_light
+import androidx.compose.ui.unit.sp
 import com.example.drchat.R
-import com.example.radiologist.chatBot.ChatViewModel
-import com.example.radiologist.model.Conversation
-import com.example.radiologist.ui.theme.bg_light
+import com.example.radiologist.ui.theme.bot_msg_dark
 import com.example.radiologist.ui.theme.bot_msg_light
 import com.example.radiologist.ui.theme.main_app_light
-import com.example.radiologist.ui.theme.top_bar_dark
-import kotlinx.coroutines.delay
+import com.example.radiologist.ui.theme.txt_input_dark
 
 
 @Composable
@@ -90,7 +77,7 @@ fun ChatAuthTextField(
         OutlinedTextField(
             value = state.value,
             onValueChange = { state.value = it },
-            placeholder = { Text(hint, color = Color.Gray , fontSize = 15.sp) },
+            placeholder = { Text(hint, color = Color.Gray, fontSize = 15.sp) },
             shape = RoundedCornerShape(15.dp),
             singleLine = true,
             modifier = Modifier
@@ -99,8 +86,7 @@ fun ChatAuthTextField(
                 .shadow(
                     elevation = 5.dp,
                     shape = RoundedCornerShape(12.dp)
-                )
-            ,
+                ),
             textStyle = TextStyle(
                 color = if (isSystemInDarkTheme) Color.White else Color.Black,
                 fontSize = 17.sp
@@ -113,16 +99,16 @@ fun ChatAuthTextField(
                 unfocusedIndicatorColor = if (isSystemInDarkTheme) txt_input_dark else main_app_light,
                 errorIndicatorColor = Color.Red,
 
-            ),
+                ),
 
-            leadingIcon =  {
-            Icon(
-                imageVector = icon,
-                contentDescription = "",
-                tint = if (isSystemInDarkTheme) Color.White else Color.Black,
-                modifier = Modifier.size(18.dp)
-            )
-        },
+            leadingIcon = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "",
+                    tint = if (isSystemInDarkTheme) Color.White else Color.Black,
+                    modifier = Modifier.size(18.dp)
+                )
+            },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
 
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
@@ -137,7 +123,7 @@ fun ChatAuthTextField(
                 }
             },
 
-        )
+            )
 
 
         if (error != null) {
@@ -194,7 +180,7 @@ fun BotTypingIndicator() {
                 Spacer(modifier = Modifier.width(8.dp))*/
                 Text(
                     text = "Typing",
-                    color =  if (isSystemInDarkTheme()) Color.White else Color.White
+                    color = if (isSystemInDarkTheme()) Color.White else Color.White
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 TypingIndicator(modifier = Modifier.size(20.dp))
@@ -211,10 +197,10 @@ fun ChatInputTextField(
     onImagePickerClicked: () -> Unit,
     onSendClicked: () -> Unit,
 
-) {
+    ) {
     Surface(
         shape = RoundedCornerShape(40.dp),
-        color = if (isSystemInDarkTheme()) top_bar_dark  else main_app_light,
+        color = if (isSystemInDarkTheme()) bot_msg_dark else main_app_light,
         modifier =
         Modifier
             .padding(8.dp)
@@ -225,7 +211,7 @@ fun ChatInputTextField(
                 .fillMaxWidth()
                 .padding(bottom = 2.dp, start = 4.dp, end = 4.dp, top = 1.dp),
             verticalAlignment = Alignment.CenterVertically,
-            ) {
+        ) {
             OutlinedTextField(
                 modifier = Modifier.weight(1f),
                 textStyle = TextStyle(
@@ -233,7 +219,7 @@ fun ChatInputTextField(
                     fontSize = 18.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    cursorColor = if(isSystemInDarkTheme()) Color.White else Color.Black,
+                    cursorColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                 ),
@@ -345,16 +331,16 @@ fun TypingIndicator(
 
 @Preview(showBackground = true)
 @Composable
- fun ChatInputPreview(){
+fun ChatInputPreview() {
     ChatInputTextField(
         text = "",
         onTextChanged = {},
         onImagePickerClicked = { },
 
 
-    ) {}
-    ChatInputTextField(text = "", onTextChanged = {}, onImagePickerClicked = {  }) {
-        
+        ) {}
+    ChatInputTextField(text = "", onTextChanged = {}, onImagePickerClicked = { }) {
+
     }
 }
 

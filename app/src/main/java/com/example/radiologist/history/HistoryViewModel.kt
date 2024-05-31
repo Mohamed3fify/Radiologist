@@ -50,6 +50,8 @@ class HistoryViewModel : ViewModel() {
             }
         )
     }
+
+
     fun resetEventState() {
         event.value = HistoryEvent.Idle
     }

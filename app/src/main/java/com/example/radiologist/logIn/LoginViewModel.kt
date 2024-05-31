@@ -2,16 +2,13 @@ package com.example.radiologist.logIn
 
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.radiologist.database.FirebaseUtils
-import com.example.radiologist.logIn.google.SignInResult
 import com.example.radiologist.logIn.google.SignInState
 import com.example.radiologist.model.AppUser
 import com.example.radiologist.model.DataUtils
-import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +32,6 @@ class LoginViewModel : ViewModel() {
     // Google SignIn
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
-
 
 
     fun login(){
@@ -81,7 +77,7 @@ class LoginViewModel : ViewModel() {
             isLoading.value = false
         }
     }
-     fun validateFields(): Boolean {
+     private fun validateFields(): Boolean {
 
         if (emailState.value.isEmpty() && emailState.value.isBlank()) {
             emailErrorState.value = "Required"
@@ -109,7 +105,7 @@ class LoginViewModel : ViewModel() {
 
     }
 
-    fun navigateToChatBot(user: AppUser) {
+    private fun navigateToChatBot(user: AppUser) {
         events.value = LoginEvent.NavigateToChatBot(user)
     }
 
@@ -118,24 +114,16 @@ class LoginViewModel : ViewModel() {
     }
 
 
-    fun setLoginSuccess(value: Boolean) {
+    private fun setLoginSuccess(value: Boolean) {
         viewModelScope.launch {
             _loginSuccess.value = value
         }
     }
 
-    fun resetLoginSuccesss() {
+    fun resetLoginSuccess() {
         viewModelScope.launch {
             _loginSuccess.value = false
         }
-    }
-
-    // Google SignIn
-    fun onSignInResult(result : SignInResult){
-        _state.update { it.copy(
-            isSignInSuccessful = result.data != null,
-            signInError = result.errorMessage
-        ) }
     }
 
     fun resetState(){

@@ -1,14 +1,12 @@
 package com.example.radiologist.utils
 
-import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +30,10 @@ import com.example.radiologist.ui.theme.bg_dark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar(title: String, onNavigationIconClick: (() -> Unit)? = null) {
+fun Toolbar(
+    title: String,
+    onNavigationIconClick: (() -> Unit)? = null
+) {
 
     TopAppBar(title = {
         val isSystemInDarkTheme = isSystemInDarkTheme()

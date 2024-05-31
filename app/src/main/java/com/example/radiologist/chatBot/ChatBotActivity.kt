@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,6 +71,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.drchat.R
@@ -78,10 +80,11 @@ import com.example.radiologist.history.HistoryActivity
 import com.example.radiologist.logIn.LoginActivity
 import com.example.radiologist.logIn.google.GoogleAuthUiClient
 import com.example.radiologist.model.Constants
+import com.example.radiologist.model.DataUtils
 import com.example.radiologist.ui.theme.DrChatTheme
-import com.example.radiologist.ui.theme.Grey
 import com.example.radiologist.ui.theme.bg_dark
 import com.example.radiologist.ui.theme.bg_light
+import com.example.radiologist.ui.theme.bot_msg_dark
 import com.example.radiologist.ui.theme.bot_msg_light
 import com.example.radiologist.ui.theme.main_app_light
 import com.example.radiologist.ui.theme.txt
@@ -90,9 +93,8 @@ import com.example.radiologist.ui.theme.user_txt_dark
 import com.example.radiologist.utils.BotTypingIndicator
 import com.example.radiologist.utils.ChatInputTextField
 import com.example.radiologist.utils.ChatToolBar
-import com.example.radiologist.utils.DividerrItem
-import com.example.radiologist.utils.DrawerBody
-import com.example.radiologist.utils.DrawerBottom
+import com.example.radiologist.utils.DividerItem
+import com.example.radiologist.utils.Settings
 import com.example.radiologist.utils.DrawerHeader
 import com.example.radiologist.utils.HistoryNavigation
 import com.google.android.gms.auth.api.identity.Identity
@@ -123,37 +125,37 @@ class ChatBotActivity : ComponentActivity() {
         setContent {
             val chatViewModel = viewModel<ChatViewModel>()
             DrChatTheme {
-
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Transparent),
-                    color = Grey,
                 ) {
-
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
                     val context = LocalContext.current
-                    val darkTheme = remember { mutableStateOf(false) }
+                    val drawerColor = if (isSystemInDarkTheme()) bg_dark else bg_light
 
                     ModalNavigationDrawer(
                         drawerContent = {
-                            ModalDrawerSheet {
+                            ModalDrawerSheet(
+                                drawerContainerColor = drawerColor ,
+                                drawerShape =
+                                RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    topEnd = 2.dp,
+                                    bottomStart = 0.dp,
+                                    bottomEnd = 2.dp
+                                )
+                            )
+                            {
                                 FirebaseUtils.getGoogleSignInUser()
                                     ?.let {
-                                        DrawerHeader(
-                                            userData = it,
-                                            darkTheme = darkTheme,
-                                            onThemeToggle = {
-                                                darkTheme.value = !darkTheme.value
-                                            }
-                                        )
+                                        DrawerHeader(userData = it)
                                     }
-                                DividerrItem()
-                                DrawerBody({}, {})
-                                Spacer(modifier = Modifier.height(10.dp))
+                                DividerItem()
                                 HistoryNavigation(
-                                    text = {
+                                    selected = false,
+                                    onHistoryClicked = {
                                         lifecycleScope.launch {
                                             val intent =
                                                 Intent(context, HistoryActivity::class.java)
@@ -166,12 +168,11 @@ class ChatBotActivity : ComponentActivity() {
                                             }
                                         }
                                     }
-
                                 )
-                                DividerrItem()
                                 FirebaseUtils.getGoogleSignInUser()
                                     ?.let {
-                                        DrawerBottom(
+                                        Settings(
+                                            selected = false,
                                             onSignOut = {
                                                 lifecycleScope.launch {
                                                     googleAuthUiClient.signOut()
@@ -194,8 +195,8 @@ class ChatBotActivity : ComponentActivity() {
                                         )
                                     }
                             }
-
-                        }, drawerState = drawerState
+                        },
+                        drawerState = drawerState,
                     )
                     {
                         Scaffold(topBar = {
@@ -204,7 +205,7 @@ class ChatBotActivity : ComponentActivity() {
                                     onNavigationIconClick = { scope.launch { drawerState.open() } },
                                     onResetChatScreen = { chatViewModel.onEvent(ChatUiEvent.ResetChatScreen) }
                                 )
-                                DividerrItem()
+                                DividerItem()
                             }
                         })
                         {
@@ -286,7 +287,7 @@ class ChatBotActivity : ComponentActivity() {
             if (chatState.isTyping) {
                 BotTypingIndicator()
             }
-            DividerrItem()
+            DividerItem()
             Row(
                 modifier =
                 Modifier
@@ -357,7 +358,6 @@ class ChatBotActivity : ComponentActivity() {
         bitmap: Bitmap?,
         onImageClick: (Bitmap?) -> Unit,
     ) {
-
         Column(
             modifier = Modifier
                 .padding(start = 100.dp, bottom = 16.dp)
@@ -372,14 +372,12 @@ class ChatBotActivity : ComponentActivity() {
                 )
                 .clip(shape = RoundedCornerShape(12.dp))
         ) {
-
             bitmap?.let {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(260.dp)
                         .clip(RoundedCornerShape(12.dp))
-
                 ) {
                     Image(
                         modifier =
@@ -392,11 +390,9 @@ class ChatBotActivity : ComponentActivity() {
                         contentDescription = "image",
                         contentScale = ContentScale.Crop,
                         bitmap = it.asImageBitmap(),
-
-                        )
+                    )
                 }
             }
-
             SelectionContainer {
                 Text(
                     modifier =
@@ -410,10 +406,7 @@ class ChatBotActivity : ComponentActivity() {
                     color = if (isSystemInDarkTheme()) Color.White else Color.Black,
                     overflow = TextOverflow.Ellipsis
                 )
-
             }
-
-
         }
     }
 
@@ -431,17 +424,15 @@ class ChatBotActivity : ComponentActivity() {
                 Modifier
                     .size(50.dp)
                     .padding(10.dp)
-
                     .background(Color.Transparent),
             )
-
             SelectionContainer {
                 Text(
                     modifier =
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSystemInDarkTheme()) txt_input_dark else bot_msg_light)
+                        .background(if (isSystemInDarkTheme()) bot_msg_dark else bot_msg_light)
                         .padding(16.dp),
                     text = response,
                     fontSize = 17.sp,
@@ -473,8 +464,8 @@ class ChatBotActivity : ComponentActivity() {
     }
 }
 
- @Composable
- fun showImage(bitmap: Bitmap?, onDismiss: () -> Unit) {
+@Composable
+fun showImage(bitmap: Bitmap?, onDismiss: () -> Unit) {
     if (bitmap != null) {
 
         var scale by remember { mutableStateOf(1f) }
@@ -514,10 +505,6 @@ class ChatBotActivity : ComponentActivity() {
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun ChatPreview() {
-    DrChatTheme {
-
-    }
-}
+fun ChatPreview() {}
 
 

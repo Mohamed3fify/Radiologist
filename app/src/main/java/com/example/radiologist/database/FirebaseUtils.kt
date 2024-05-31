@@ -28,6 +28,7 @@ import java.util.UUID
 
 object FirebaseUtils {
     private val auth = Firebase.auth
+
     fun addUser(
         user: AppUser,
         onSuccessListener: OnSuccessListener<Void>,
@@ -87,6 +88,7 @@ object FirebaseUtils {
             .collection(Conversation.COLLECTION_NAME)
             .whereEqualTo(Constants.USER_ID, userId)
             //.orderBy("dateTime", Query.Direction.DESCENDING)
+            //.orderBy("dateTime", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
@@ -279,6 +281,8 @@ fun fetchChatMessagesWithImages(
             }
         }
     }
+
+
 }
 
 

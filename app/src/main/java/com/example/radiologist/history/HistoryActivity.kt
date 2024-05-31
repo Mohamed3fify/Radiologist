@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -52,22 +54,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import com.example.radiologist.model.Conversation
 import com.example.radiologist.ui.theme.DrChatTheme
 import com.example.radiologist.ui.theme.main_app_light
 import com.example.radiologist.ui.theme.txt_input_dark
-import com.example.radiologist.utils.DividerrItem
+import com.example.radiologist.utils.DividerItem
 import com.example.radiologist.utils.Toolbar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.drchat.R
 import com.example.radiologist.chatBot.ChatBotActivity
-import com.example.radiologist.chatBot.ChatUiEvent
-import com.example.radiologist.chatBot.ChatViewModel
 import com.example.radiologist.model.Constants
 import com.example.radiologist.ui.theme.bg_dark
 import com.example.radiologist.ui.theme.bg_light
-import kotlinx.coroutines.launch
 
 class HistoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,11 +93,11 @@ fun HistoryContent(
     Scaffold(
         topBar = {
             Column {
-
                 Toolbar(
-                    title = "History",
-                ) { onFinish() }
-                DividerrItem()
+                  title = "History",
+                  onNavigationIconClick =  { onFinish() }
+                )
+                DividerItem()
             }
         }) { paddingValues ->
         paddingValues

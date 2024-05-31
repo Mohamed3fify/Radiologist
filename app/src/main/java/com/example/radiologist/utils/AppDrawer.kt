@@ -1,267 +1,222 @@
 package com.example.radiologist.utils
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.AddComment
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment.Companion.CenterStart
-import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.drchat.R
-import com.example.radiologist.chatBot.ChatViewModel
-
-
-@Composable
-fun AppDrawer(
-    onChatClicked: (String) -> Unit,
-    onNewChatClicked: () -> Unit,
-    onIconClicked: () -> Unit = {},
-    viewModel: ChatViewModel
-) {
-    AppDrawerIn(
-        onChatClicked = onChatClicked,
-        onNewChatClicked = onNewChatClicked,
-        onIconClicked = onIconClicked,
-    )
-}
+import com.example.radiologist.logIn.google.UserData
+import com.example.radiologist.model.DataUtils.appUser
+import com.example.radiologist.ui.theme.main_app_light
+import com.example.radiologist.ui.theme.txt_input_dark
 
 @Composable
-private fun AppDrawerIn(
-    onChatClicked: (String) -> Unit,
-    onNewChatClicked: () -> Unit,
-    onIconClicked: () -> Unit,
-) {
+fun DrawerHeader(userData: UserData) {
+    val contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
-        DrawerHeader(clickAction = onIconClicked)
-        DividerItem()
-        DrawerItemHeader("Chats")
-        ConversationItem("New Chat", Icons.Outlined.AddComment, false) {
-            onNewChatClicked()
-        }
-
-        DividerItem(modifier = Modifier.padding(horizontal = 28.dp))
-        DrawerItemHeader("Settings")
-        ConversationItem("Settings", Icons.Filled.Settings, false) { onChatClicked("Settings") }
-    }
-}
-
-@Composable
-private fun DrawerHeader(
-    clickAction: () -> Unit = {}
-) {
-    val paddingSizeModifier = Modifier
-        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-        .size(34.dp)
-
-    Row(verticalAlignment = CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(12.dp))
+    )
+    {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp)
-                .weight(1f), verticalAlignment = CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_radiologist_light),
-                modifier = paddingSizeModifier.then(Modifier.clip(RoundedCornerShape(6.dp))),
-                contentDescription = null
-            )
-            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                Text(
-                    "Dr Chat",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary,
+            if (userData.profilePictureUrl != null) {
+                AsyncImage(
+                    model = userData.profilePictureUrl,
+                    contentDescription = "profile picture",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.account),
+                    contentDescription = "default img",
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .size(80.dp)
+                        .padding(8.dp),
+                    tint = contentColor
                 )
             }
         }
 
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            if (userData.userName != null) {
+                Text(
+                    text = userData.userName,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
+                )
+            } else {
+                appUser?.firstName?.let { firstName ->
+                    Text(
+                        text = firstName,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor
+                    )
+                }
+            }
+            if (userData.email != null) {
+                Text(
+                    text = userData.email,
+                    fontSize = 14.sp,
+                    color = contentColor
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun DrawerItemHeader(text: String) {
-    Box(
-        modifier = Modifier
-            .heightIn(min = 52.dp)
-            .padding(horizontal = 28.dp),
-        contentAlignment = CenterStart
-    ) {
-        Text(
-            text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun ConversationItem(
-    text: String,
-    icon: ImageVector = Icons.Filled.Edit,
+fun HistoryNavigation(
     selected: Boolean,
-    onChatClicked: () -> Unit
+    onHistoryClicked: () -> Unit,
 ) {
+    val contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     val background = if (selected) {
-        Modifier.background(MaterialTheme.colorScheme.primaryContainer)
+        Modifier
+            .background(MaterialTheme.colorScheme.primaryContainer)
     } else {
         Modifier
     }
     Row(
         modifier = Modifier
-            .height(56.dp)
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
+            .clickable { onHistoryClicked() }
             .clip(CircleShape)
-            .then(background)
-            .clickable(onClick = onChatClicked),
-        verticalAlignment = CenterVertically
+            .then(background),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
-        val iconTint = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
         Icon(
-            icon,
-            tint = iconTint,
-            modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                .size(25.dp),
+            imageVector = Icons.Filled.History,
             contentDescription = null,
+            modifier = Modifier
+                .padding(start = 6.dp, top = 12.dp, bottom = 16.dp)
+                .size(24.dp),
+            tint = contentColor,
         )
+
         Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.padding(start = 12.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            text = "History",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = contentColor,
+            modifier = Modifier
+                .padding(start = 12.dp, top = 12.dp, bottom = 16.dp)
         )
     }
 }
 
 @Composable
-private fun RecycleConversationItem(
-    text: String,
-    icon: ImageVector = Icons.Filled.Edit,
-    selected: Boolean,
-    onChatClicked: () -> Unit,
-    onDeleteClicked: () -> Unit
-) {
+fun Settings(selected: Boolean, onSignOut: () -> Unit) {
+    val contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     val background = if (selected) {
-        Modifier.background(MaterialTheme.colorScheme.primaryContainer)
+        Modifier
+            .background(MaterialTheme.colorScheme.primaryContainer)
     } else {
         Modifier
     }
-    Row(
+    Column(
         modifier = Modifier
-            .height(56.dp)
             .fillMaxWidth()
-            .padding(horizontal = 34.dp)
-            .clip(CircleShape)
-            .then(background)
-            .clickable(onClick = onChatClicked),
-        verticalAlignment = CenterVertically
+            .padding(horizontal = 16.dp)
     ) {
-        val iconTint = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = contentColor
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Settings",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = contentColor
+            )
         }
-        Icon(
-            icon,
-            tint = iconTint,
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
             modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                .size(25.dp),
-            contentDescription = null,
-        )
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .fillMaxWidth(0.85f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.weight(0.9f, true))
-        Icon(
-            imageVector = Icons.Filled.Delete,
-            contentDescription = "Delete",
-            tint = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.clickable { onDeleteClicked() }
-        )
-    }
-}
+                .height(50.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp)
+                .clickable { onSignOut() }
+                .clip(CircleShape)
+                .then(background),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Logout,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = Color.Red
+            )
+            Spacer(modifier = Modifier.width(2.dp))
 
-@Composable
-private fun ProfileItem(text: String, urlToImage: String?, onProfileClicked: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onProfileClicked),
-        verticalAlignment = CenterVertically
-    ) {
+            Text(
+                text = "Sign out",
+                color = Color.Red,
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold
+                )
+            )
 
-
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 12.dp)
-        )
+        }
     }
 }
 
@@ -269,19 +224,22 @@ private fun ProfileItem(text: String, urlToImage: String?, onProfileClicked: () 
 fun DividerItem(modifier: Modifier = Modifier) {
     Divider(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        thickness = 1.dp
     )
 }
 
-@Preview()
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewAppDrawerIn(
-) {
-    AppDrawerIn(
-        onChatClicked = {},
-        onNewChatClicked = {},
-        onIconClicked = {},
-    )
+fun DrawerPreview() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        DividerItem()
+        HistoryNavigation(selected = false) {}
+    }
 
 }
-

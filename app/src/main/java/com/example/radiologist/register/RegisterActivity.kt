@@ -77,9 +77,7 @@ fun RegisterContent(
 
     Scaffold(
         topBar = {
-            Toolbar(title = "") {
-                onFinish()
-            }
+            Toolbar(title = "" , onNavigationIconClick = onFinish)
         }) { paddingValues ->
         paddingValues
 

@@ -1,6 +1,7 @@
 package com.example.radiologist.chatBot
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -34,6 +35,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -60,7 +62,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.drchat.R
@@ -80,7 +80,6 @@ import com.example.radiologist.history.HistoryActivity
 import com.example.radiologist.logIn.LoginActivity
 import com.example.radiologist.logIn.google.GoogleAuthUiClient
 import com.example.radiologist.model.Constants
-import com.example.radiologist.model.DataUtils
 import com.example.radiologist.ui.theme.DrChatTheme
 import com.example.radiologist.ui.theme.bg_dark
 import com.example.radiologist.ui.theme.bg_light
@@ -88,7 +87,6 @@ import com.example.radiologist.ui.theme.bot_msg_dark
 import com.example.radiologist.ui.theme.bot_msg_light
 import com.example.radiologist.ui.theme.main_app_light
 import com.example.radiologist.ui.theme.txt
-import com.example.radiologist.ui.theme.txt_input_dark
 import com.example.radiologist.ui.theme.user_txt_dark
 import com.example.radiologist.utils.BotTypingIndicator
 import com.example.radiologist.utils.ChatInputTextField
@@ -98,6 +96,7 @@ import com.example.radiologist.utils.Settings
 import com.example.radiologist.utils.DrawerHeader
 import com.example.radiologist.utils.HistoryNavigation
 import com.google.android.gms.auth.api.identity.Identity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -116,12 +115,6 @@ class ChatBotActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val googleAuthUiClient by lazy {
-            GoogleAuthUiClient(
-                context = applicationContext,
-                oneTapClient = Identity.getSignInClient(applicationContext)
-            )
-        }
         setContent {
             val chatViewModel = viewModel<ChatViewModel>()
             DrChatTheme {
@@ -133,68 +126,10 @@ class ChatBotActivity : ComponentActivity() {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
                     val context = LocalContext.current
-                    val drawerColor = if (isSystemInDarkTheme()) bg_dark else bg_light
 
                     ModalNavigationDrawer(
                         drawerContent = {
-                            ModalDrawerSheet(
-                                drawerContainerColor = drawerColor ,
-                                drawerShape =
-                                RoundedCornerShape(
-                                    topStart = 0.dp,
-                                    topEnd = 2.dp,
-                                    bottomStart = 0.dp,
-                                    bottomEnd = 2.dp
-                                )
-                            )
-                            {
-                                FirebaseUtils.getGoogleSignInUser()
-                                    ?.let {
-                                        DrawerHeader(userData = it)
-                                    }
-                                DividerItem()
-                                HistoryNavigation(
-                                    selected = false,
-                                    onHistoryClicked = {
-                                        lifecycleScope.launch {
-                                            val intent =
-                                                Intent(context, HistoryActivity::class.java)
-                                            context.startActivity(intent)
-
-                                        }
-                                        if (drawerState.isOpen) {
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
-                                        }
-                                    }
-                                )
-                                FirebaseUtils.getGoogleSignInUser()
-                                    ?.let {
-                                        Settings(
-                                            selected = false,
-                                            onSignOut = {
-                                                lifecycleScope.launch {
-                                                    googleAuthUiClient.signOut()
-                                                    Toast.makeText(
-                                                        applicationContext,
-                                                        "Sign out",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-                                                    val intent =
-                                                        Intent(
-                                                            context,
-                                                            LoginActivity::class.java
-                                                        )
-                                                    intent.flags =
-                                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                                                    context.startActivity(intent)
-                                                    (context as Activity).finishAffinity()
-                                                }
-                                            }
-                                        )
-                                    }
-                            }
+                            DrawerContent(scope, drawerState, context)
                         },
                         drawerState = drawerState,
                     )
@@ -275,8 +210,8 @@ class ChatBotActivity : ComponentActivity() {
                                 }
                             )
                         } else {
-                            botItem(
-                                response = chat.prompt,
+                            modelItem(
+                                response = chat.prompt
                             )
                         }
 
@@ -411,7 +346,7 @@ class ChatBotActivity : ComponentActivity() {
     }
 
     @Composable
-    fun botItem(response: String) {
+    fun modelItem(response: String) {
         val profileImage =
             painterResource(if (isSystemInDarkTheme()) R.drawable.logo_radiologist_dark else R.drawable.logo_radiologist_light)
         Column(
@@ -461,6 +396,42 @@ class ChatBotActivity : ComponentActivity() {
         }
 
         return null
+    }
+
+    @Composable
+    fun DrawerContent(scope: CoroutineScope, drawerState: DrawerState, context: Context) {
+        val googleAuthUiClient = GoogleAuthUiClient(context, Identity.getSignInClient(context))
+
+        ModalDrawerSheet(
+            drawerContainerColor = if (isSystemInDarkTheme()) bg_dark else bg_light,
+            drawerShape = RoundedCornerShape(topStart = 0.dp, topEnd = 2.dp, bottomStart = 0.dp, bottomEnd = 2.dp)
+        ) {
+            FirebaseUtils.getGoogleSignInUser()?.let {
+                DrawerHeader(userData = it)
+            }
+            DividerItem()
+            HistoryNavigation(selected = false, onHistoryClicked = {
+                lifecycleScope.launch {
+                    val intent = Intent(context, HistoryActivity::class.java)
+                    context.startActivity(intent)
+                    if (drawerState.isOpen) {
+                        scope.launch { drawerState.close() }
+                    }
+                }
+            })
+            FirebaseUtils.getGoogleSignInUser()?.let {
+                Settings(selected = false, onSignOut = {
+                    lifecycleScope.launch {
+                        googleAuthUiClient.signOut()
+                        Toast.makeText(applicationContext, "Sign out", Toast.LENGTH_LONG).show()
+                        val intent = Intent(context, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                        context.startActivity(intent)
+                        (context as Activity).finishAffinity()
+                    }
+                })
+            }
+        }
     }
 }
 

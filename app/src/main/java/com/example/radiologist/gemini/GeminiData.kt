@@ -1,4 +1,4 @@
-package com.example.radiologist.data
+package com.example.radiologist.gemini
 
 import android.graphics.Bitmap
 import com.example.radiologist.model.Chat
@@ -8,7 +8,7 @@ import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-object ChatData {
+object GeminiData {
     private const val api_key = "AIzaSyBhG66MrA24TQXjRfEyeeOPYKsDvAIo8rI"
 
     var conversationId: Conversation? = null

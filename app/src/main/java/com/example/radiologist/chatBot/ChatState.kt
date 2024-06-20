@@ -8,8 +8,8 @@ data class ChatState(
     val prompt: String = "",
     val bitmap: Bitmap? = null,
     val isTyping: Boolean = false,
-    val isLoading: Boolean = false
- )
+    val isLoading: Boolean = false,
+    )
  {
      companion object
  }

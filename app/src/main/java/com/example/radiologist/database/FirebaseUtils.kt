@@ -87,8 +87,6 @@ object FirebaseUtils {
         Firebase.firestore
             .collection(Conversation.COLLECTION_NAME)
             .whereEqualTo(Constants.USER_ID, userId)
-            //.orderBy("dateTime", Query.Direction.DESCENDING)
-            //.orderBy("dateTime", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
@@ -141,7 +139,7 @@ object FirebaseUtils {
 
 fun saveChatMessage(
     chat: Chat,
-    conversationId: String
+    conversationId: String,
 ) {
         val documentReference = Firebase.firestore
             .collection(Conversation.COLLECTION_NAME)
@@ -151,6 +149,13 @@ fun saveChatMessage(
 
         chat.conversationId = conversationId
         chat.dateTime = Date().time
+
+    val chatData = hashMapOf(
+        "prompt" to chat.prompt,
+        "isFromUser" to chat.isFromUser,
+        "conversationId" to chat.conversationId,
+        "dateTime" to chat.dateTime,
+    )
 
         if (chat.bitmap != null) {
             val storageRef = Firebase.storage.reference
@@ -170,15 +175,7 @@ fun saveChatMessage(
                 if (task.isSuccessful) {
                     val downloadUri = task.result
 
-                    val chatData = hashMapOf(
-                        "prompt" to chat.prompt,
-                        "bitmapUri" to downloadUri.toString(),
-                        "isFromUser" to chat.isFromUser,
-                        "conversationId" to chat.conversationId,
-                        "dateTime" to chat.dateTime,
-
-                    )
-
+                    chatData["bitmapUri"] = downloadUri.toString()
                     documentReference
                         .set(chatData)
                         .addOnSuccessListener {
@@ -193,13 +190,7 @@ fun saveChatMessage(
             }
         } else {
 
-            val chatData = hashMapOf(
-                "prompt" to chat.prompt,
-                "bitmapUri" to null,
-                "isFromUser" to chat.isFromUser,
-                "conversationId" to chat.conversationId,
-                "dateTime" to chat.dateTime,
-            )
+            chatData["bitmapUri"] = null
             documentReference
                 .set(chatData)
                 .addOnSuccessListener {
